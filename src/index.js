@@ -58,6 +58,7 @@ app.post("/", async (req, res) => {
 });
 
 
-app.listen(process.env.EXPRESS_LISTENING_PORT, () => {
-	console.log(`Listening on port ${process.env.EXPRESS_LISTENING_PORT}`);
+const port = process.env.EXPRESS_LISTENING_PORT || 4242;
+app.listen(port, () => {
+	console.log(`Listening on port ${port}`);
 });
