@@ -1,6 +1,6 @@
-# Custom PopSauce server
+# Vinaigrette
 
-Express.JS server for hosting custom PopSauce games.
+Express.JS server for hosting custom PopSauce-like games.
 
 This server requires you to have an AWS account and that you have an access key to your 
 account.
