@@ -7,7 +7,7 @@ const router = express.Router();
 const app = express();
 const http = require("http").Server(app);
 
-const uploadFileToS3 = require("./s3-config");
+const { uploadFileToS3 } = require("./services/s3-service");
 
 app.use(require("cors")());
 app.use(require("express-fileupload")());
@@ -23,7 +23,8 @@ app.post("/", async (req, res) => {
 		try {
 			const s3Response = await uploadFileToS3(req.files.filetoupload);
 			return res.status(200).json({
-				message: 'File uploaded'
+				message: 'File uploaded',
+				url: s3Response.fileUrl
 			});
 		} catch (err) {
 			return res.status(400).json({
