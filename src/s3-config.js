@@ -4,7 +4,7 @@ aws.config.update({
 	region: process.env.AWS_REGION_CODE,
 	accessKeyId: process.env.AWS_ACCESS_KEY_ID,
 	secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-})
+});
 
 const s3 = new aws.S3();
 
@@ -16,7 +16,7 @@ function uploadFileToS3(file) {
 
 		const uploadData = {
 			Bucket: s3BucketName,
-			Key: file.name,
+			Key: Date.now() + file.name,
 			Body: file.data
 		};
 
@@ -25,7 +25,7 @@ function uploadFileToS3(file) {
 				reject(err);
 			} else {
 				resolve({
-					fileUrl: s3Data
+					fileUrl: s3Data.Location
 				});
 			}
 		});
