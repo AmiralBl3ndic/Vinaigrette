@@ -8,6 +8,7 @@ const http = require("http").Server(app);
  *										MIDDLEWARES
  ********************************************************/
 
+app.use(require("morgan")("dev"));
 app.use(require("cors")());
 app.use(require("express-fileupload")());
 app.use(require("body-parser").json());
