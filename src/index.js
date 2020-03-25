@@ -18,10 +18,13 @@ app.get("/", (req, res) => {
 	res.status(200).sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
-app.post("/", async (req, res) => {
-	if (req.files && req.files.filetoupload) {
+/**
+ * Awaits data to insert as new "sauce" entries
+ */
+app.post("/media", async (req, res) => {
+	if (req.files && req.files.media) {
 		try {
-			const s3Response = await uploadFileToS3(req.files.filetoupload);
+			const s3Response = await uploadFileToS3(req.files.media);
 			return res.status(200).json({
 				message: 'File uploaded',
 				url: s3Response.fileUrl
