@@ -53,10 +53,15 @@ router.post("/quote", async (req, res) => {
  * answer {string}: Awaited answer
  */
 router.post("/image", async (req, res) => {
-
 	if (req.files === undefined || req.files.image === undefined) {  // Image type request, no images passed in
 		return res.status(400).json({
 			message: "Empty or missing \"image\" field"
+		});
+	}
+
+	if (req.body.answer === undefined || req.body.answer === "") {  // If no answer or empty answer
+		return res.status(400).json({
+			message: "Empty or missing \"answer\" field"
 		});
 	}
 
