@@ -1,0 +1,7 @@
+# JavaScript files and environment variables
+node_modules/
+**/*.env
+
+# IDE files
+.vscode/
+.idea/
