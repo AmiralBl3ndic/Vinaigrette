@@ -2,18 +2,12 @@ require("dotenv").config()  // Configure dotenv
 
 const path = require("path");
 
-const aws = require("aws-sdk");
-aws.config.update({ 
-	region: process.env.AWS_REGION_CODE,
-	accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-	secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-});
-const s3 = new aws.S3();
-
 const express = require("express");
 const router = express.Router();
 const app = express();
 const http = require("http").Server(app);
+
+const uploadFileToS3 = require("./s3-config");
 
 app.use(require("cors")());
 app.use(require("express-fileupload")());
@@ -27,29 +21,15 @@ app.get("/", (req, res) => {
 app.post("/", async (req, res) => {
 	if (req.files && req.files.filetoupload) {
 		try {
-			const file = req.files.filetoupload;
-
-			const s3UploadConfig = {
-				Bucket: process.env.AWS_S3_BUCKET_NAME,
-				Key: file.name,
-				Body: file.data
-			};
-
-			s3.upload(s3UploadConfig, (err, data) => {
-				if (err) return console.error(err);
-
-				console.log("S3 Data:", data);
+			const s3Response = await uploadFileToS3(req.files.filetoupload);
+			return res.status(200).json({
+				message: 'File uploaded'
 			});
 		} catch (err) {
-			console.error(err)
 			return res.status(400).json({
 				message: 'Unable to upload file'
 			});
 		}
-
-		return res.status(200).json({
-			message: 'Uploading file'
-		});
 	} else {
 		res.status(400).json({
 			message: 'No file to upload'
