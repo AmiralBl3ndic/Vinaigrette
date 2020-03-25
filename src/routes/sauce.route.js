@@ -1,7 +1,5 @@
 const router = require("express").Router();
 
-const ow = require("ow");
-
 const S3Service = require("../services/s3-service");
 
 /**
