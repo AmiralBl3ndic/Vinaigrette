@@ -41,13 +41,73 @@ This endpoint is only able to parse requests sent with `Content-Type: multipart/
 
 Get a random sauce (image or quote) from the database
 
+#### Response
+
+The response will be a JSON object, its structure depends on whether you have retrieved a quote 
+or an image.
+
+If you are retrieving a quote, the structure will be as follow:
+
+```JSON
+{
+    "type": "quote",
+    "quote": "Content of the random quote sauce",
+    "answer": "Answer to that random quote sauce"
+}
+```
+
+
+If you are retrieving an image, the structure will be as follow:
+
+```JSON
+{
+    "type": "image",
+    "imageUrl": "https://secure-link-to-the-image/",
+    "answer": "Answer to that random image sauce"
+}
+```
+
 ### `GET /sauce/random/quote`
 
 Get a random quote sauce from the database
 
+#### Response
+
+This endpoint produces a JSON object with the structure as follow:
+
+```JSON
+{
+    "type": "quote",
+    "quote": "Content of the random quote sauce",
+    "answer": "Answer to that random quote sauce"
+}
+```
+
 ### `GET /sauce/random/image`
 
 Get a random image sauce from the database
+
+#### Response
+
+This endpoint produces a JSON object with the structure as follow:
+
+```JSON
+{
+    "type": "image",
+    "imageUrl": "https://secure-link-to-the-image/",
+    "answer": "Answer to that random image sauce"
+}
+```
+
+
+## Troubleshooting
+
+Whenever an error occurs, you should aways be able to retrieve a JSON object describing the nature 
+of the error or your problem.
+
+A quick way to understand is to look at the `message` field of this JSON object, it should contain 
+a human-readable description of the exact problem.
+
 
 ## Setup
 
