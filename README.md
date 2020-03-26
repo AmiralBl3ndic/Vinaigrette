@@ -5,6 +5,50 @@ Express.JS server for hosting custom PopSauce-like games.
 This server requires you to have an AWS account and that you have an access key to your 
 account.
 
+## Available REST API endpoints
+
+### `GET /`
+
+Get a HTML testing page for feeding data to the database
+
+### `POST /sauce/quote`
+
+Add a new quote sauce to the database
+
+#### Request body
+
+The request body must contain the following fields:
+
+- `quote` *(string)*: The quote to store
+- `answer` *(string)*: The awaited answer to the sauce
+
+### `POST /sauce/image`
+
+Add a new image sauce to the database
+
+#### Request body
+
+The request body must contain the following fields:
+
+- `image` *(file)*: The image to store (MIME type must be either "image/jpeg" or "image/png")
+- `answer` *(string)*: The awaited answer to the sauce
+
+#### Warning
+
+This endpoint is only able to parse requests sent with `Content-Type: multipart/form-data`
+
+### `GET /sauce/random`
+
+Get a random sauce (image or quote) from the database
+
+### `GET /sauce/random/quote`
+
+Get a random quote sauce from the database
+
+### `GET /sauce/random/image`
+
+Get a random image sauce from the database
+
 ## Setup
 
 1. Create an AWS account
