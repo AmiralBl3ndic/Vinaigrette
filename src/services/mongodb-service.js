@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 
+const { formatAnswer } = require("../utils");
+
 const errorCodes = require("../error-codes");
 
 const QuoteSauce = require("../models/quote-sauce");
@@ -23,8 +25,7 @@ class MongoDBService {
 		}
 
 		// Convert answer to a usable format
-		let { answer } = req.body;
-		answer = answer.replace(/ /g, "").toLowerCase();
+		const answer = formatAnswer(req.body.answer);
 
 		return new QuoteSauce({
 			answer,
