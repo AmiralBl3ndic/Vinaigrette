@@ -1,3 +1,3 @@
 module.exports = {
-	mongoConnectionString: process.env.CONTAINERIZED === "true" ? "mongodb://mongo:27017/vinaigrette" : "mongodb://localhost:27017/vinaigrette"
+	mongoConnectionString: process.env.CONTAINERIZED === "true" ? "mongodb://mongo:27017/" : "mongodb://localhost:27017/"
 };

@@ -12,7 +12,11 @@ const mongoose = require("mongoose");
  *											DATABASE
  ********************************************************/
 
-mongoose.connect(serverConfig.mongoConnectionString, { useNewUrlParser: true })
+mongoose.connect(serverConfig.mongoConnectionString, { 
+		useNewUrlParser: true,
+		user: process.env.MONGO_INITDB_ROOT_USERNAME,
+		pass: process.env.MONGO_INITDB_ROOT_PASSWORD
+	})
 	.then(() => console.log("MongoDB connection succeeded"))
 	.catch((err) => console.error("Can't connect to MongoDB container"));
 
