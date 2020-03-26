@@ -7,6 +7,14 @@ account.
 
 ## Available REST API endpoints
 
+### IMPORTANT
+
+To avoid flood, the API only authorizes a certain number of requests on resource-consuming endpoints.
+
+There are two limiters:
+- `postLimiter`: The requests limit to all endpoints protected by this limiter (shared) is set to **60 requests by hour** (default)
+- `randomLimiter`: The requests limit to all endpoints protected by this limiter (shared) is set to **3600 requests by hour** (default)
+
 ### `GET /`
 
 Get a HTML testing page for feeding data to the database
@@ -14,6 +22,10 @@ Get a HTML testing page for feeding data to the database
 ### `POST /sauce/quote`
 
 Add a new quote sauce to the database
+
+#### Requests limiter
+
+This endpoint is protected with the `postLimiter` requests limiter.
 
 #### Request body
 
@@ -25,6 +37,10 @@ The request body must contain the following fields:
 ### `POST /sauce/image`
 
 Add a new image sauce to the database
+
+#### Requests limiter
+
+This endpoint is protected with the `postLimiter` requests limiter.
 
 #### Request body
 
@@ -40,6 +56,10 @@ This endpoint is only able to parse requests sent with `Content-Type: multipart/
 ### `GET /sauce/random`
 
 Get a random sauce (image or quote) from the database
+
+#### Requests limiter
+
+This endpoint is protected with the `randomLimiter` requests limiter.
 
 #### Response
 
@@ -71,6 +91,10 @@ If you are retrieving an image, the structure will be as follow:
 
 Get a random quote sauce from the database
 
+#### Requests limiter
+
+This endpoint is protected with the `randomLimiter` requests limiter.
+
 #### Response
 
 This endpoint produces a JSON object with the structure as follow:
@@ -86,6 +110,10 @@ This endpoint produces a JSON object with the structure as follow:
 ### `GET /sauce/random/image`
 
 Get a random image sauce from the database
+
+#### Requests limiter
+
+This endpoint is protected with the `randomLimiter` requests limiter.
 
 #### Response
 
