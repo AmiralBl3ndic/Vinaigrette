@@ -78,28 +78,21 @@ router.post("/image", async (req, res) => {
 		});
 	}
 
-	let s3Response;
-
 	// Attempt to store the image in the S3 Bucket
 	try {
-		s3Response = await S3Service.uploadImage(req.files.image);
+		// Upload image to online storage, gather its url and save new sauce to database
+		const imageSauce = await MongoDBService.getImageSauceFromRequest(req);
+		imageSauce.save();
+
+		return res.status(201).json({
+			message: "Image sauce saved"
+		});
 	} catch (err) {
 		return res.status(400).json({
 			errorCode: err.errorCode,
 			message: 'Unable to upload file',
 		});
 	}
-
-	// TODO: store image url and answer in database record with service
-
-	return res.status(500).json({
-		message: "This endpoint has not been implemented yet"
-	});
-
-	return res.status(201).json({
-		message: "Sauce created",
-		url: s3Response.fileUrl
-	});
 });
 
 module.exports = router;
