@@ -56,3 +56,16 @@ variables into a `.env` file at the root of the server.
 - `AWS_ACCESS_KEY_ID`: ID of the access key that the server should use to access your S3 
 Bucket
 - `AWS_SECRET_ACCESS_KEY`: Secret of the access key to required to access the S3 Bucket
+- `MONGO_INITDB_ROOT_USERNAME`: Username to use for accessing your MongoDB database (does not have to be root)
+- `MONGO_INITDB_ROOT_PASSWORD`: Password of the user to use for accessing the MongoDB database
+- *(Optional)* `CONTAINERIZED`: `(true|false)` Whether you are running your application in a container (LXC/Docker)
+
+5. Ensure the database connection string is correct
+
+This information can be found in the file `src/server.config.js` under the `mongoConnectionString` property.
+
+By default, the connection string allows to work in a local environment with the a local instance of MongoDB 
+(better for debugging) rather than setting up containers already.
+
+Please ensure the database connection string matches the one you want to use :
+**If you use a sub database in your MongoDB instance, you have to specify it here as the application does not handle such cases yet**
