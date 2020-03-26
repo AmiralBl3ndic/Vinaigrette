@@ -98,7 +98,7 @@ router.get("/random", async (req, res) => {
 });
 
 /**
- * ? GET /random/quote
+ * ? GET /sauce/random/quote
  * 
  * Returns a random `QuoteSauce` from the database
  */
@@ -114,6 +114,27 @@ router.get("/random/quote", async (req, res) => {
 
 	return res.status(200).json({
 		quote: sauce.quote,
+		answer: sauce.answer
+	});
+});
+
+/**
+ * ? GET /sauce/random/image
+ * 
+ * Returns a random `ImageSauce` from the database
+ */
+router.get("/random/image", async (req, res) => {
+	const sauce = await MongoDBService.getRandomImageSauce();
+
+	if (sauce == null) {  // If no ImageSauce found
+		return res.status(404).json({
+			errorCode: errorCodes.E_NO_DATA,
+			message: "Unable to retrieve any image sauce"
+		});
+	}
+
+	return res.status(200).json({
+		imageUrl: sauce.imageUrl,
 		answer: sauce.answer
 	});
 });
