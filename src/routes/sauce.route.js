@@ -2,6 +2,9 @@ const router = require("express").Router();
 
 const errorCodes = require("../error-codes");
 
+const ImageSauce = require("../models/image-sauce");
+const QuoteSauce = require("../models/quote-sauce");
+
 const S3Service = require("../services/s3-service");
 const MongoDBService = require("../services/mongodb-service");
 
@@ -36,7 +39,62 @@ router.post("/", describe);
  * Returns a random `QuoteSauce` or `ImageSauce` with specified type
  */
 router.get("/random", async (req, res) => {
-	return res.status(500).json({ message: "Endpoint not implemented yet" });
+	// Determine if getting an ImageSauce or a QuoteSauce (50% odds)
+	if (Math.random() >= 0.5) {
+		// Getting an ImageSauce
+
+		let sauce = await MongoDBService.getRandomImageSauce();
+
+		if (sauce == null) {  // If no ImageSauce found, try to get a random QuoteSauce
+			sauce = await MongoDBService.getRandomQuoteSauce();
+
+			if (sauce == null) {  // If no QuoteSauce found either
+				return res.status(404).json({
+					errorCode: errorCodes.E_NO_DATA,
+					message: "Unable to retrieve any sauce"
+				});
+			}
+
+			return res.status(200).json({
+				type: "quote",
+				quote: sauce.quote,
+				answer: sauce.answer
+			});
+		}
+
+		return res.status(200).json({
+			type: "image",
+			imageUrl: sauce.imageUrl,
+			answer: sauce.answer
+		});
+	} else {
+		// Getting a QuoteSauce
+
+		let sauce = await MongoDBService.getRandomQuoteSauce();
+
+		if (sauce == null) {  // If no QuoteSauce found, try to get a random ImageSauce
+			sauce = await MongoDBService.getRandomImageSauce();
+
+			if (sauce == null) {
+				return res.status(404).json({
+					errorCode: errorCodes.E_NO_DATA,
+					message: "Unable to retrieve any sauce"
+				});
+			}
+
+			return res.status(200).json({
+				type: "image",
+				imageUrl: sauce.imageUrl,
+				answer: sauce.answer
+			});
+		}
+
+		return res.status(200).json({
+			type: "quote",
+			quote: sauce.quote,
+			answer: sauce.answer
+		});
+	}
 });
 
 /**
