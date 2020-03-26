@@ -4,6 +4,16 @@ const express = require("express");
 const app = express();
 const http = require("http").Server(app);
 
+const mongoose = require("mongoose");
+
+/*********************************************************
+ *											DATABASE
+ ********************************************************/
+
+mongoose.connect('mongodb://mongo:27017/vinaigrette', { useNewUrlParser: true })
+	.then(() => console.log("MongoDB connection succeeded"))
+	.catch((err) => console.error("Can't connect to MongoDB container"));
+
 /*********************************************************
  *										MIDDLEWARES
  ********************************************************/

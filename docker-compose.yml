@@ -9,7 +9,10 @@ services:
       - "1664:4242"
     links:
       - mongo
+    depends_on:
+      - mongo
     environment:
+      WAIT_HOSTS: mongo:27017
       MONGO_ROOT_USERNAME: root
       MONGO_ROOT_PASSWORD: ~%GgFX.5Kw;evNi
   mongo:
