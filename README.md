@@ -48,7 +48,7 @@ or an image.
 
 If you are retrieving a quote, the structure will be as follow:
 
-```JSON
+```json
 {
     "type": "quote",
     "quote": "Content of the random quote sauce",
@@ -59,7 +59,7 @@ If you are retrieving a quote, the structure will be as follow:
 
 If you are retrieving an image, the structure will be as follow:
 
-```JSON
+```json
 {
     "type": "image",
     "imageUrl": "https://secure-link-to-the-image/",
@@ -75,7 +75,7 @@ Get a random quote sauce from the database
 
 This endpoint produces a JSON object with the structure as follow:
 
-```JSON
+```json
 {
     "type": "quote",
     "quote": "Content of the random quote sauce",
@@ -91,7 +91,7 @@ Get a random image sauce from the database
 
 This endpoint produces a JSON object with the structure as follow:
 
-```JSON
+```json
 {
     "type": "image",
     "imageUrl": "https://secure-link-to-the-image/",
@@ -130,7 +130,7 @@ Access"* box.
 Because you only want the server to be able to directly write files into your bucket, please 
 set the following strategy for your bucket:
 
-```JSON
+```json
 {
     "Version": "2012-10-17",
     "Statement": [
