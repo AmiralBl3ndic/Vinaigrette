@@ -1,0 +1,21 @@
+version: "3.7"
+services:
+  vinaigrette:
+    image: amiralblndic/vinaigrette-server:latest
+    container_name: vinaigrette-server
+    restart: always
+    build: ./
+    ports:
+      - "1664:4242"
+    links:
+      - mongo
+    environment:
+      MONGO_ROOT_USERNAME: root
+      MONGO_ROOT_PASSWORD: ~%GgFX.5Kw;evNi
+  mongo:
+    image: mongo:latest
+    container_name: vinaigrette-mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: ~%GgFX.5Kw;evNi
