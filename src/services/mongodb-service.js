@@ -31,6 +31,7 @@ class MongoDBService {
 
 		return new QuoteSauce({
 			answer,
+			originalAnswer: req.body.answer,
 			_id: new mongoose.Types.ObjectId(),
 			quote: req.body.quote
 		});
@@ -59,6 +60,7 @@ class MongoDBService {
 
 		return new ImageSauce({
 			answer,
+			originalAnswer: req.body.answer,
 			_id: new mongoose.Types.ObjectId(),
 			imageUrl: fileUrl
 		});
