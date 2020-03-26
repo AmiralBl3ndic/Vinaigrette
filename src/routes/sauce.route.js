@@ -1,5 +1,7 @@
 const router = require("express").Router();
 
+const errorCodes = require("../error-codes");
+
 const S3Service = require("../services/s3-service");
 const MongoDBService = require("../services/mongodb-service");
 
@@ -37,11 +39,23 @@ router.post("/quote", async (req, res) => {
 		});
 	}
 
-	const quote = MongoDBService.getQuoteSauceFromRequest(req);
+	try {
+		// Gather and save quote to database
+		const quote = MongoDBService.getQuoteSauceFromRequest(req);
+		quote.save();
 
-	return res.status(500).json({
-		message: "This endpoint has not been implemented yet"
-	});
+		return res.status(201).json({
+			message: "Quote record saved"
+		});
+	} catch (err) {
+		if (err.errorCode === errorCodes.E_BAD_ARGUMENT) {
+			return res.status(400).json(err);
+		} else {
+			return res.status(500).json({
+				message: "An error occured, unable to save quote"
+			});
+		}
+	}
 });
 
 /**
