@@ -2,6 +2,9 @@
 node_modules/
 **/*.env
 
+# MongoDB persistence data
+mongodb-data/
+
 # IDE files
 .vscode/
 .idea/
