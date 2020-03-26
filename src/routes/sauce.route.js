@@ -70,7 +70,8 @@ router.post("/image", async (req, res) => {
 		s3Response = await S3Service.uploadImage(req.files.image);
 	} catch (err) {
 		return res.status(400).json({
-			message: 'Unable to upload file'
+			errorCode: err.errorCode,
+			message: 'Unable to upload file',
 		});
 	}
 
