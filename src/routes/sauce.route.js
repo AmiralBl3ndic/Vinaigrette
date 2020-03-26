@@ -1,6 +1,7 @@
 const router = require("express").Router();
 
 const S3Service = require("../services/s3-service");
+const MongoDBService = require("../services/mongodb-service");
 
 /**
  * Describes the route endpoints
@@ -36,11 +37,11 @@ router.post("/quote", async (req, res) => {
 		});
 	}
 
+	const quote = MongoDBService.getQuoteSauceFromRequest(req);
+
 	return res.status(500).json({
 		message: "This endpoint has not been implemented yet"
 	});
-
-	// TODO: store quote and answer in database record with service
 });
 
 /**
