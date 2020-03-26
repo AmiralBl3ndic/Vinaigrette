@@ -6,4 +6,4 @@ const imageSauceSchema = mongoose.Schema({
 	answer: String
 });
 
-module.exports = mongoose.model('ImageSauce', imageSauceSchema, 'sauces');
+module.exports = mongoose.model('ImageSauce', imageSauceSchema, 'image_sauces');

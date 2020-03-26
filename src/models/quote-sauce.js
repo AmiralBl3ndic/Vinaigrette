@@ -6,4 +6,4 @@ const quoteSauceSchema = mongoose.Schema({
 	answer: String
 });
 
-module.exports = mongoose.model('QuoteSauce', quoteSauceSchema, 'sauces');
+module.exports = mongoose.model('QuoteSauce', quoteSauceSchema, 'quote_sauces');
