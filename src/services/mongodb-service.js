@@ -63,6 +63,24 @@ class MongoDBService {
 			imageUrl: fileUrl
 		});
 	}
+
+	/**
+	 * Get a random Image sauce from the database
+	 */
+	static async getRandomImageSauce () {
+		const records = await ImageSauce.aggregate().sample(1);
+		
+		return records.length !== 0 ? records[0] : null;
+	}
+
+	/**
+	 * Get a random Quote sauce from the database
+	 */
+	static async getRandomQuoteSauce () {
+		const records = await QuoteSauce.aggregate().sample(1);
+
+		return records.length !== 0 ? records[0] : null;
+	}
 };
 
 module.exports = MongoDBService;
