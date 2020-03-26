@@ -98,6 +98,27 @@ router.get("/random", async (req, res) => {
 });
 
 /**
+ * ? GET /random/quote
+ * 
+ * Returns a random `QuoteSauce` from the database
+ */
+router.get("/random/quote", async (req, res) => {
+	const sauce = await MongoDBService.getRandomQuoteSauce();
+
+	if (sauce == null) {  // If no QuoteSauce found
+		return res.status(404).json({
+			errorCode: errorCodes.E_NO_DATA,
+			message: "Unable to retrieve any quote sauce"
+		});
+	}
+
+	return res.status(200).json({
+		quote: sauce.quote,
+		answer: sauce.answer
+	});
+});
+
+/**
  * ? POST /sauce/quote
  * 
  * Registers a new `QuoteSauce` and saves it to the database
