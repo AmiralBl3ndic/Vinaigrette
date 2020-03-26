@@ -11,14 +11,14 @@ const s3 = new aws.S3();
 const s3BucketName = process.env.AWS_S3_BUCKET_NAME;
 
 class S3Service {
-	static uploadFileToS3(file) {
+	static uploadImage(image) {
 		return new Promise(async (resolve, reject) => {
-			// TODO: type checking for [file] 
+			// TODO: type checking for [image] 
 
 			const uploadData = {
 				Bucket: s3BucketName,
-				Key: Date.now() + file.name,
-				Body: file.data
+				Key: Date.now() + image.name,
+				Body: image.data
 			};
 
 			s3.upload(uploadData, (err, s3Data) => {

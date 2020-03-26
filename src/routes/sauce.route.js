@@ -67,7 +67,7 @@ router.post("/image", async (req, res) => {
 
 	// Attempt to store the image in the S3 Bucket
 	try {
-		s3Response = await S3Service.uploadFileToS3(req.files.image);
+		s3Response = await S3Service.uploadImage(req.files.image);
 	} catch (err) {
 		return res.status(400).json({
 			message: 'Unable to upload file'
