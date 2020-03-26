@@ -1,5 +1,7 @@
 const router = require("express").Router();
 
+const { postRateLimiter, randomRateLimiter } = require("../server.config");
+
 const errorCodes = require("../error-codes");
 
 const ImageSauce = require("../models/image-sauce");
@@ -13,7 +15,7 @@ const MongoDBService = require("../services/mongodb-service");
  * 
  * Returns a random `QuoteSauce` or `ImageSauce` with specified type
  */
-router.get("/random", async (req, res) => {
+router.get("/random", randomRateLimiter, async (req, res) => {
 	// Determine if getting an ImageSauce or a QuoteSauce (50% odds)
 	if (Math.random() >= 0.5) {
 		// Getting an ImageSauce
@@ -77,7 +79,7 @@ router.get("/random", async (req, res) => {
  * 
  * Returns a random `QuoteSauce` from the database
  */
-router.get("/random/quote", async (req, res) => {
+router.get("/random/quote", randomRateLimiter, async (req, res) => {
 	const sauce = await MongoDBService.getRandomQuoteSauce();
 
 	if (sauce == null) {  // If no QuoteSauce found
@@ -98,7 +100,7 @@ router.get("/random/quote", async (req, res) => {
  * 
  * Returns a random `ImageSauce` from the database
  */
-router.get("/random/image", async (req, res) => {
+router.get("/random/image", randomRateLimiter, async (req, res) => {
 	const sauce = await MongoDBService.getRandomImageSauce();
 
 	if (sauce == null) {  // If no ImageSauce found
@@ -122,7 +124,7 @@ router.get("/random/image", async (req, res) => {
  * @param {String} req.body.quote Quote to save
  * @param {String} req.body.answer Answer for this sauce
  */
-router.post("/quote", async (req, res) => {
+router.post("/quote", postRateLimiter, async (req, res) => {
 	if (req.body.quote === undefined || req.body.quote === "") {  // If no quote or empty quote
 		return res.status(400).json({
 			message: "Empty or missing \"quote\" field"
@@ -165,7 +167,7 @@ router.post("/quote", async (req, res) => {
  * @param {Buffer} req.files.image.data Non-empty buffer of bytes representing the image
  * @param {String} req.body.answer Answer for this sauce
  */
-router.post("/image", async (req, res) => {
+router.post("/image", postRateLimiter, async (req, res) => {
 	if (req.files === undefined || req.files.image === undefined) {  // Image type request, no images passed in
 		return res.status(400).json({
 			message: "Empty or missing \"image\" field"
