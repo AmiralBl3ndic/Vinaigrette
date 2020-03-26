@@ -9,31 +9,6 @@ const S3Service = require("../services/s3-service");
 const MongoDBService = require("../services/mongodb-service");
 
 /**
- * Describes the route endpoints
- * @param {*} req Incoming request
- * @param {*} res Outgoing response
- */
-function describe (req, res) {
-	return res.status(404).json({
-		description: "To add a new quote sauce: POST /sauce/quote\nTo add a new image sauce: POST /sauce/image"
-	});
-}
-
-/**
- * ? GET /sauce
- * 
- * Describes the sub endpoints of the /sauce route
- */
-router.get("/", describe);
-
-/**
- * ? POST /sauce
- * 
- * Describes the sub endpoints of the /sauce route
- */
-router.post("/", describe);
-
-/**
  * ? GET /sauce/random
  * 
  * Returns a random `QuoteSauce` or `ImageSauce` with specified type
