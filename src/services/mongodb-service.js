@@ -66,6 +66,8 @@ class MongoDBService {
 
 	/**
 	 * Get a random Image sauce from the database
+	 * 
+	 * @returns {ImageSauce} Random ImageSauce from the database
 	 */
 	static async getRandomImageSauce () {
 		const records = await ImageSauce.aggregate().sample(1);
@@ -75,6 +77,8 @@ class MongoDBService {
 
 	/**
 	 * Get a random Quote sauce from the database
+	 * 
+	 * @returns {QuoteSauce} Random QuoteSauce from the database
 	 */
 	static async getRandomQuoteSauce () {
 		const records = await QuoteSauce.aggregate().sample(1);
