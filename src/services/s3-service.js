@@ -1,7 +1,7 @@
 const aws = require('aws-sdk');
 const errorCodes = require('../error-codes');
 
-const ImageService = require('./image-service');
+const ImageService = require('./image-service').default;
 
 aws.config.update({
 	region: process.env.AWS_REGION_CODE,

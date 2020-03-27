@@ -1,4 +1,4 @@
-const sharp = require("sharp");
+const sharp = require('sharp');
 
 /**
  * Wrapper for image manipulation tasks
@@ -15,7 +15,7 @@ class ImageService {
 			return null;
 		}
 
-		return await sharp(buffer).toFormat("jpeg").jpeg().toBuffer();
+		return sharp(buffer).toFormat("jpeg").jpeg().toBuffer();
 	}
 };
 
