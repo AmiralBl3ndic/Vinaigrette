@@ -30,5 +30,12 @@ module.exports = {
       'anonymous': 'never',
       'named': 'always'
     }],
+    'no-console': ['error', {
+      'allow': [
+        'warn',
+        'error',
+        'info'
+      ]
+    }]
   },
 };
