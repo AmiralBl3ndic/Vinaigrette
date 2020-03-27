@@ -1,7 +1,7 @@
 const aws = require('aws-sdk');
 const errorCodes = require('../error-codes');
 
-const ImageService = require('./image-service').default;
+const ImageService = require('./image-service');
 
 aws.config.update({
 	region: process.env.AWS_REGION_CODE,
@@ -52,7 +52,7 @@ class S3Service {
 			// Prepare data: rename image (with date addition to avoid collision), convert it to JPEG and compress it
 			const uploadData = {
 				Bucket: s3BucketName,
-				Key: Date.now() + image.name.replace('.png', '.jpeg'),
+				Key: Date.now() + image.name.replace('.png', '.jpg'),
 				Body: await ImageService.convertToJPEG(image.data),
 			};
 
