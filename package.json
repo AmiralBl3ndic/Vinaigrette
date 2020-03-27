@@ -1,7 +1,7 @@
 {
-  "name": "tests-custom-popsauce",
+  "name": "vinaigrette-server",
   "version": "0.0.0",
-  "description": "Custom backend PopSauce app",
+  "description": "Backend server and API for the Vinaigrette app",
   "main": "src/index.js",
   "author": "Camille Briand <camille.briand@efrei.net> (https://camille-briand.fr/)",
   "license": "MIT",
