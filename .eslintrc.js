@@ -18,9 +18,17 @@ module.exports = {
     'indent': ['error', 'tab'],
     'no-tabs': 'off',
     'no-async-promise-executor': 'off',
-    'max-len': ['warnin', {
+    'max-len': ['warn', {
       'code': 150
     }],
-    'no-trailing-spaces': 'off'
+    'no-trailing-spaces': 'off',
+    'prefer-promise-reject-errors': 'off',
+    'no-multi-spaces': ['error', {
+      'ignoreEOLComments': true,
+    }],
+    'space-before-function-paren': ['warn', {
+      'anonymous': 'never',
+      'named': 'always'
+    }],
   },
 };
