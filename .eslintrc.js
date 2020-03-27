@@ -15,5 +15,11 @@ module.exports = {
     ecmaVersion: 2018,
   },
   rules: {
+    "indent": ["error", "tab"],
+    "no-tabs": "off",
+    "no-async-promise-executor": "off",
+    "max-len": ["warning", {
+      "code": 150
+    }]
   },
 };
