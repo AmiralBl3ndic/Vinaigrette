@@ -26,7 +26,12 @@ mongoose.connect(serverConfig.mongoConnectionString, {
 
 app.use(require("morgan")("dev"));
 app.use(require("cors")());
-app.use(require("express-fileupload")());
+app.use(require("express-fileupload")({
+	limits: {
+		fileSize: serverConfig.maximumImageSizeAllowed
+	},
+	abortOnLimit: true
+}));
 app.use(require("body-parser").json());
 app.use(require("body-parser").urlencoded({ extended: true }));
 
