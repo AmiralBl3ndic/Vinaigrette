@@ -1,13 +1,13 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const { formatAnswer } = require("../utils");
+const { formatAnswer } = require('../utils');
 
-const errorCodes = require("../error-codes");
+const errorCodes = require('../error-codes');
 
-const S3Service = require("./s3-service");
+const S3Service = require('./s3-service');
 
-const QuoteSauce = require("../models/quote-sauce");
-const ImageSauce = require("../models/image-sauce");
+const QuoteSauce = require('../models/quote-sauce');
+const ImageSauce = require('../models/image-sauce');
 
 /**
  * Wrapper around MongoDB-related actions
@@ -22,7 +22,7 @@ class MongoDBService {
 		if (!req.body || !req.body.quote || !req.body.answer) {
 			throw new Error({
 				errorCode: errorCodes.E_BAD_ARGUMENT,
-				message: "Request is missing required data"
+				message: 'Request is missing required data',
 			});
 		}
 
@@ -33,7 +33,7 @@ class MongoDBService {
 			answer,
 			originalAnswer: req.body.answer,
 			_id: new mongoose.Types.ObjectId(),
-			quote: req.body.quote
+			quote: req.body.quote,
 		});
 	}
 
@@ -48,7 +48,7 @@ class MongoDBService {
 		if (!req.body || !req.body.answer || !req.files || !req.files.image) {
 			throw new Error({
 				errorCode: errorCodes.E_BAD_ARGUMENT,
-				message: "Request is missing required data"
+				message: 'Request is missing required data',
 			});
 		}
 
@@ -62,7 +62,7 @@ class MongoDBService {
 			answer,
 			originalAnswer: req.body.answer,
 			_id: new mongoose.Types.ObjectId(),
-			imageUrl: fileUrl
+			imageUrl: fileUrl,
 		});
 	}
 
@@ -87,6 +87,6 @@ class MongoDBService {
 
 		return records.length !== 0 ? records[0] : null;
 	}
-};
+}
 
 module.exports = MongoDBService;

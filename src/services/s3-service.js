@@ -1,7 +1,7 @@
-const aws = require("aws-sdk");
-const errorCodes = require("../error-codes");
+const aws = require('aws-sdk');
+const errorCodes = require('../error-codes');
 
-const ImageService = require("./image-service");
+const ImageService = require('./image-service').default;
 
 aws.config.update({
 	region: process.env.AWS_REGION_CODE,
@@ -14,8 +14,8 @@ const s3 = new aws.S3();
 const s3BucketName = process.env.AWS_S3_BUCKET_NAME;
 
 const allowedMimeTypes = [
-	"image/jpeg",
-	"image/png"
+	'image/jpeg',
+	'image/png',
 ];
 
 /**
@@ -29,14 +29,14 @@ class S3Service {
 	 * 
 	 * @param {Object} image Image to upload to S3
 	 */
-	static async uploadImage(image) {
+	static async uploadImage (image) {
 		return new Promise(async (resolve, reject) => {
 			// Check if MIME type of file is supported
 			if (image.mimetype === undefined || !allowedMimeTypes.includes(image.mimetype)) {
 				return reject({
 					errorCode: image.mimetype === undefined ? errorCodes.E_BAD_ARGUMENT : errorCodes.E_UNSUPPORTED_TYPE,
-					error: "Missing attribute or wrong value",
-					message: "\"mimetype\" attribute of parameter must be set to a valid image format (JPEG or PNG)"
+					error: 'Missing attribute or wrong value',
+					message: '"mimetype" attribute of parameter must be set to a valid image format (JPEG or PNG)',
 				});
 			}
 
@@ -44,8 +44,8 @@ class S3Service {
 			if (image.data === undefined || !image.data.length) {
 				return reject({
 					errorCode: image.data === undefined ? errorCodes.E_BAD_ARGUMENT : errorCodes.E_WRONG_VALUE,
-					error: "Missing attribute or wrong value",
-					message: "\"data\" attribute of parameter should be a non-empty buffer"
+					error: 'Missing attribute or wrong value',
+					message: '"data" attribute of parameter should be a non-empty buffer',
 				});
 			}
 
@@ -53,23 +53,23 @@ class S3Service {
 			const uploadData = {
 				Bucket: s3BucketName,
 				Key: Date.now() + image.name.replace('.png', '.jpeg'),
-				Body: await ImageService.convertToJPEG(image.data)
+				Body: await ImageService.convertToJPEG(image.data),
 			};
 
-			s3.upload(uploadData, (err, s3Data) => {
+			return s3.upload(uploadData, (err, s3Data) => {
 				if (err) {  // If an error occurs while uploading the file to the S3 bucket
 					return reject({
 						...err,
-						errorCode: errorCodes.E_AWS_S3_ERROR
-					});
-				} else {
-					return resolve({  // Success, gather the URL of the newly uploaded image
-						fileUrl: s3Data.Location
+						errorCode: errorCodes.E_AWS_S3_ERROR,
 					});
 				}
+				
+				return resolve({  // Success, gather the URL of the newly uploaded image
+					fileUrl: s3Data.Location,
+				});
 			});
 		});
 	}
-};
+}
 
 module.exports = S3Service;
