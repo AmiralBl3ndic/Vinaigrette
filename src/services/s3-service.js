@@ -29,11 +29,10 @@ class S3Service {
 	 * 
 	 * @param {Object} image Image to upload to S3
 	 */
-	static async uploadImage(image) {
+	static async uploadImage (image) {
 		return new Promise(async (resolve, reject) => {
 			// Check if MIME type of file is supported
 			if (image.mimetype === undefined || !allowedMimeTypes.includes(image.mimetype)) {
-				// eslint-disable-next-line prefer-promise-reject-errors
 				return reject({
 					errorCode: image.mimetype === undefined ? errorCodes.E_BAD_ARGUMENT : errorCodes.E_UNSUPPORTED_TYPE,
 					error: 'Missing attribute or wrong value',
@@ -43,7 +42,6 @@ class S3Service {
 
 			// Check if the bytes buffer of the image is not empty
 			if (image.data === undefined || !image.data.length) {
-				// eslint-disable-next-line prefer-promise-reject-errors
 				return reject({
 					errorCode: image.data === undefined ? errorCodes.E_BAD_ARGUMENT : errorCodes.E_WRONG_VALUE,
 					error: 'Missing attribute or wrong value',
@@ -58,9 +56,8 @@ class S3Service {
 				Body: await ImageService.convertToJPEG(image.data),
 			};
 
-			s3.upload(uploadData, (err, s3Data) => {
+			return s3.upload(uploadData, (err, s3Data) => {
 				if (err) {  // If an error occurs while uploading the file to the S3 bucket
-				// eslint-disable-next-line prefer-promise-reject-errors
 					return reject({
 						...err,
 						errorCode: errorCodes.E_AWS_S3_ERROR,
@@ -73,6 +70,6 @@ class S3Service {
 			});
 		});
 	}
-};
+}
 
 module.exports = S3Service;
