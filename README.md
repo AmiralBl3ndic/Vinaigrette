@@ -53,7 +53,7 @@ The request body must contain the following fields:
 
 This endpoint is only able to parse requests sent with `Content-Type: multipart/form-data`.
 
-By default, this endpoint will only accept files up to 2 MB. This threshold is configurable with the 
+By default, this endpoint will only accept files up to 15 MB. This threshold is configurable with the 
 `maximumImageSizeAllowed` variable of `server.config.js`.
 
 ### `GET /sauce/random`
