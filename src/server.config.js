@@ -3,7 +3,7 @@ const rateLimit = require("express-rate-limit");
 /**
  * Maximum image size allowed for uploads (in bytes)
  */
-const maximumImageSizeAllowed = 500 * 1024;  // Default = 2 MB
+const maximumImageSizeAllowed = 15 * 1024 * 1024;  // Default = 15 MB
 
 /**
  * The maximum number of POST requests a single IP will be able to make to
