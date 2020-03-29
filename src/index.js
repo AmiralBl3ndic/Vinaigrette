@@ -9,18 +9,6 @@ const serverConfig = require('./server.config');
 
 
 /** *******************************************************
- *											DATABASE
- ******************************************************* */
-
-mongoose.connect(serverConfig.mongoConnectionString, { 
-	useNewUrlParser: true,
-	user: process.env.MONGO_INITDB_ROOT_USERNAME,
-	pass: process.env.MONGO_INITDB_ROOT_PASSWORD,
-})
-	.then(() => console.info('MongoDB connection succeeded'))
-	.catch(() => console.error("Can't connect to MongoDB container"));
-
-/** *******************************************************
  *										MIDDLEWARES
  ******************************************************* */
 
@@ -46,7 +34,26 @@ app.use('/', require('./routes/index.route'));
 app.use('/sauce', require('./routes/sauce.route'));
 
 
-const port = process.env.EXPRESS_LISTENING_PORT || 4242;
-app.listen(port, () => {
-	console.info(`Listening on port ${port}`);
-});
+/** *******************************************************
+ *							DATABASE & SERVER STARTUP
+ ******************************************************* */
+
+console.info('Attempting to connect to MongoDB database...');
+mongoose.connect(serverConfig.mongoConnectionString, { 
+	useNewUrlParser: true,
+	useUnifiedTopology: true,
+	serverSelectionTimeoutMS: 8 * 1000,  // Attempt to connect for 8 seconds before failure
+	user: process.env.MONGO_INITDB_ROOT_USERNAME,
+	pass: process.env.MONGO_INITDB_ROOT_PASSWORD,
+})
+	.then(() => {
+		console.info('Connected to MongoDB database.\nStarting server...');
+
+		// Determine port to listen on and start Express app
+		const port = process.env.EXPRESS_LISTENING_PORT || 4242;
+		app.listen(port, () => console.info(`Vinaigrette server started on port ${port}.`));
+	})
+	.catch((err) => {
+		console.error("Can't connect to MongoDB database:", err);
+		process.exit(1);
+	});
