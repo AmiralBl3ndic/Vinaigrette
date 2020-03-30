@@ -15,6 +15,9 @@ class SocketHandler {
 		this.score = undefined;
 	}
 
+	/**
+	 * Binds socket events to actions
+	 */
 	handle () {
 		// Bind socket events to SocketHandler actions
 		this.socket.on('disconnect', this.handleDisconnect);
