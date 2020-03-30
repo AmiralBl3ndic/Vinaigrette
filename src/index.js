@@ -64,6 +64,14 @@ mongoose.connect(serverConfig.mongoConnectionString, {
 
 		io.on('connection', (socket) => {
 			console.info('Client connected:', socket.handshake.address.address);
+			
+			socket.on('disconnect', () => console.info('Client disconnected'));
+
+			socket.on('create_room', ({ roomName }) => {
+				// TODO: check if room already exists
+				// TODO: create and join room if doesn't already exists
+				console.info(`Attempt to create room ${roomName}`);
+			});
 		});
 	})
 	.catch((err) => {
