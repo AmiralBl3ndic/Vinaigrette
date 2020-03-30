@@ -1,18 +1,22 @@
 require('dotenv').config();
 
+const mongoose = require('mongoose');
+
 const express = require('express');
 
-const mongoose = require('mongoose');
+const app = express();
+
+const socketio = require('socket.io');
 
 const bodyParser = require('body-parser');
 const serverConfig = require('./server.config');
 
+const SocketHandler = require('./socket-handler');
 
 /** *******************************************************
  *										MIDDLEWARES
  ******************************************************* */
 
-const app = express();
 
 app.use(require('morgan')('dev'));
 app.use(require('cors')());
@@ -25,6 +29,7 @@ app.use(require('express-fileupload')({
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
 
 /** *******************************************************
  *											ROUTES
@@ -51,7 +56,14 @@ mongoose.connect(serverConfig.mongoConnectionString, {
 
 		// Determine port to listen on and start Express app
 		const port = process.env.EXPRESS_LISTENING_PORT || 4242;
-		app.listen(port, () => console.info(`Vinaigrette server started on port ${port}.`));
+		const server = app.listen(port, () => console.info(`Vinaigrette server started on port ${port}.`));
+
+		/** *******************************************************
+		 *											SOCKETS
+		 ******************************************************* */
+		const io = socketio.listen(server);
+
+		io.on('connection', (socket) => new SocketHandler(socket).handle());
 	})
 	.catch((err) => {
 		console.error("Can't connect to MongoDB database:", err);

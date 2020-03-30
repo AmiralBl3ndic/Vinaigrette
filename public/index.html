@@ -67,6 +67,12 @@
 			<input type="submit" value="Add a quote sauce" />
 		</form>
 	</div>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		const socket = io('http://localhost:4242');
+		socket.on('connect', () => console.log('Socket connected'));
+	</script>
 </body>
 
 </html>
