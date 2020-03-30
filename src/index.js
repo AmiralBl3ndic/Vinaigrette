@@ -12,6 +12,7 @@ const bodyParser = require('body-parser');
 const serverConfig = require('./server.config');
 
 const SocketHandler = require('./socket-handler');
+const Room = require('./models/room');
 
 /** *******************************************************
  *										MIDDLEWARES
@@ -62,6 +63,7 @@ mongoose.connect(serverConfig.mongoConnectionString, {
 		 *											SOCKETS
 		 ******************************************************* */
 		const io = socketio.listen(server);
+		Room.io = io;
 
 		io.on('connection', (socket) => new SocketHandler(socket).handle());
 	})
