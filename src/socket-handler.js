@@ -10,21 +10,21 @@ class SocketHandler {
 		console.info(`Client connected (${socket.id})`);
 
 		this.socket = socket;
-		this.emit = this.socket.emit;  // Shorthand
-		this.on = this.socket.on;  // Shorthand
-		this.join = this.socket.join;  // Shorthand
+		this.id = socket.id;
 
 		this.score = undefined;
+	}
 
+	handle () {
 		// Bind socket events to SocketHandler actions
-		this.on('disconnect', this.handleDisconnect);
+		this.socket.on('disconnect', this.handleDisconnect);
 	}
 
 	/**
 	 * Handes disconnection of a client
 	 */
 	handleDisconnect () {
-		console.info(`Client disconnected (${this.socket.id})`);
+		console.info(`Client disconnected (${this.id})`);
 	}
 }
 
