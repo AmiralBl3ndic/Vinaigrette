@@ -11,6 +11,8 @@ const socketio = require('socket.io');
 const bodyParser = require('body-parser');
 const serverConfig = require('./server.config');
 
+const SocketHandler = require('./socket-handler');
+
 /** *******************************************************
  *										MIDDLEWARES
  ******************************************************* */
@@ -58,21 +60,10 @@ mongoose.connect(serverConfig.mongoConnectionString, {
 
 		/** *******************************************************
 		 *											SOCKETS
-		 ******************************************************* */		
-
+		 ******************************************************* */
 		const io = socketio.listen(server);
 
-		io.on('connection', (socket) => {
-			console.info('Client connected:', socket.handshake.address.address);
-			
-			socket.on('disconnect', () => console.info('Client disconnected'));
-
-			socket.on('create_room', ({ roomName }) => {
-				// TODO: check if room already exists
-				// TODO: create and join room if doesn't already exists
-				console.info(`Attempt to create room ${roomName}`);
-			});
-		});
+		io.on('connection', (socket) => new SocketHandler(socket).handle());
 	})
 	.catch((err) => {
 		console.error("Can't connect to MongoDB database:", err);
