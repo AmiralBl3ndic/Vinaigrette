@@ -6,6 +6,11 @@ class Room {
 	 */
 	static rooms = [];
 
+	/**
+	 * Check if a name is available for room creation
+	 * @param {String} name Name of the room to check
+	 * @returns {Boolean} Whether it is possible to create a room with given name
+	 */
 	static isNameAvailable (name) {
 		return !this.rooms.map((room) => room.name).includes(name);
 	}

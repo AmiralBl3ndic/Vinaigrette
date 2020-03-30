@@ -1,3 +1,5 @@
+const Room = require('./models/room');
+
 /**
  * Handler for socket-related actions
  */
@@ -12,6 +14,7 @@ class SocketHandler {
 		this.socket = socket;
 		this.id = socket.id;
 
+		this.name = undefined;
 		this.score = undefined;
 	}
 
@@ -19,15 +22,29 @@ class SocketHandler {
 	 * Binds socket events to actions
 	 */
 	handle () {
-		// Bind socket events to SocketHandler actions
 		this.socket.on('disconnect', this.handleDisconnect);
+		this.socket.on('create_room', this.handleCreateRoom);
 	}
 
 	/**
-	 * Handes disconnection of a client
+	 * Handles disconnection of a client
 	 */
 	handleDisconnect () {
 		console.info(`Client disconnected (${this.id})`);
+	}
+
+	/**
+	 * Handles creation of a room by a client
+	 * @param {String} params.roomName Name of the room to create
+	 */
+	handleCreateRoom ({ roomName }) {
+		if (!Room.isNameAvailable(roomName)) {
+			this.socket.emit('create_room_error');
+		}
+
+		const room = new Room(roomName);
+		this.socket.join(room.name);
+		room.connectedPlayers.push(this);
 	}
 }
 
