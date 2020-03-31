@@ -143,7 +143,9 @@ The available custom actions that the server will understand are the following:
 
 Set your usernamee for the session.
 
-You must provide a username in the `username` field of the parameter.
+#### Parameters
+
+You must provide a username in the `username` field of the parameter (object).
 
 **IMPORTANT:** For many events, it is required that you set a username.
 
@@ -234,6 +236,23 @@ listen to.
 object parameter that will give more details about the failure through its `error` field
 - `start_game_success` Indicates that the room has been created and that you have joined it, 
 this response comes with an object parameter that will give you the name of the room
+
+### `sauce_answer`
+
+Submit an answer for the current sauce.
+
+The server will only listen for this event in the timespan of a round. 
+
+#### Parameters
+
+This action takes a string as parameter, it must contain the submitted answer.
+
+#### Responses
+
+The server will respond with events:
+
+- `wrong_answer`: If the answer is incorrect
+- `good_answer`: If the answer is correct
 
 
 ## Handling server events
