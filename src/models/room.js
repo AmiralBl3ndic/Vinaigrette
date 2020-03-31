@@ -4,6 +4,8 @@ const { formatAnswer } = require('../utils');
 const MongoDBService = require('../services/mongodb-service');
 const ImageSauce = require('./image-sauce');
 
+const { requests: clientEvent, responses: serverResponse } = require('../socket-event-names');
+
 class Room {
 	/**
 	 * SocketIO Server
@@ -100,19 +102,19 @@ class Room {
 
 		// If no sauce found
 		if (!sauce) {
-			Room.io.in(this.name).emit('no_sauces_available');
-			Room.io.in(this.name).emit('game_end');
+			Room.io.in(this.name).emit(serverResponse.NO_SAUCES_AVAILABLE);
+			Room.io.in(this.name).emit(serverResponse.GAME_END);
 			throw new Error('No sauce found');  // Nothing to be done
 		}
 
 		// Determine type of sauce and send it to players
 		if (sauce instanceof ImageSauce) {
-			Room.io.in(this.name).emit('new_round_sauce', {
+			Room.io.in(this.name).emit(serverResponse.NEW_ROUND_SAUCE, {
 				type: 'image',
 				imageUrl: sauce.imageUrl,
 			});
 		} else {
-			Room.io.in(this.name).emit('new_round_sauce', {
+			Room.io.in(this.name).emit(serverResponse.NEW_ROUND_SAUCE, {
 				type: 'quote',
 				quote: sauce.quote,
 			});
@@ -138,17 +140,17 @@ class Room {
 			}
 
 			// Notify player of good answer
-			socket.emit('good_answer');
+			socket.emit(serverResponse.GOOD_ANSWER);
 
 			// Notify all players of scoreboard update
-			Room.io.in(this.name).emit('scoreboard_update', {
+			Room.io.in(this.name).emit(serverResponse.SCOREBOARD_UPDATE, {
 				player: socket.username,
 				found: true,
 				score: socket.score,
 			});
 		} else {
 			// Notify player of wrong answer
-			socket.emit('wrong_answer');
+			socket.emit(serverResponse.WRONG_ANSWER);
 		}
 	}
 
@@ -179,22 +181,24 @@ class Room {
 			}
 
 			// Listen for players answers
-			this.playersSockets.forEach((socket) => socket.on('sauce_answer', (answer) => this.processPlayerAnswer(socket, answer, sauce.answer)));
+			this.playersSockets.forEach(
+				(socket) => socket.on(clientEvent.SAUCE_ANSWER, (answer) => this.processPlayerAnswer(socket, answer, sauce.answer)),
+			);
 
 			// Wait for round duration before doing anything
 			setTimeout(() => {
 				console.info(`[GAME] [Room "${this.name}"] Round ended`);
 
 				// Stop listening to player answers
-				this.playersSockets.forEach((socket) => socket.removeListener('sauce_answer'));
+				this.playersSockets.forEach((socket) => socket.removeListener(clientEvent.SAUCE_ANSWER));
 
 				// Notify players of round end
-				Room.io.in(this.name).emit('round_end');
+				Room.io.in(this.name).emit(serverResponse.ROUND_END);
 
 				// If no player has won yet, start a new round after a timeout
 				if (!this.hasAnyPlayerWon(pointsToWin)) {
 					// Send good answer to all players
-					Room.io.in(this.name).emit('right_answer', {
+					Room.io.in(this.name).emit(serverResponse.RIGHT_ANSWER, {
 						answer: sauce.originalAnswer,
 					});
 
@@ -210,7 +214,7 @@ class Room {
 						.sort((p1, p2) => p2.score - p1.score);  // Sort winning players by score in descending order
 
 					// Notify all players of winner
-					Room.io.in(this.name).emit('player_won', winningPlayers[0]);
+					Room.io.in(this.name).emit(serverResponse.PLAYER_WON, winningPlayers[0]);
 
 					console.info(`[GAME] [Room "${this.name}"] Game ended`);
 				}
