@@ -83,6 +83,39 @@ class Room {
 	}
 
 	/**
+	 * Get a random sauce and send it to the players
+	 * 
+	 * @returns {ImageSauce|QuoteSauce} Random sauce
+	 * @throws {Error} When no sauce found
+	 */
+	async getAndSendRandomSauceToPlayers () {
+		// Get a random sauce
+		const sauce = await MongoDBService.getRandomSauce();
+
+		// If no sauce found
+		if (!sauce) {
+			Room.io.in(this.name).emit('no_sauces_available');
+			Room.io.in(this.name).emit('game_end');
+			throw new Error('No sauce found');  // Nothing to be done
+		}
+
+		// Determine type of sauce and send it to players
+		if (sauce instanceof ImageSauce) {
+			Room.io.in(this.name).emit('new_round_sauce', {
+				type: 'image',
+				imageUrl: sauce.imageUrl,
+			});
+		} else {
+			Room.io.in(this.name).emit('new_round_sauce', {
+				type: 'quote',
+				quote: sauce.quote,
+			});
+		}
+
+		return sauce;
+	}
+
+	/**
 	 * Start a game in the room
 	 */
 	async start () {
@@ -97,27 +130,12 @@ class Room {
 		});
 
 		const startGameRound = async () => {
-			// Get a random sauce
-			const sauce = await MongoDBService.getRandomSauce();
+			let sauce;
 
-			// If no sauce found
-			if (!sauce) {
-				Room.io.in(this.name).emit('no_sauces_available');
-				Room.io.in(this.name).emit('game_end');
-				return;  // Nothing to be done
-			}
-
-			// Determine type of sauce and send it to players
-			if (sauce instanceof ImageSauce) {
-				Room.io.in(this.name).emit('new_round_sauce', {
-					type: 'image',
-					imageUrl: sauce.imageUrl,
-				});
-			} else {
-				Room.io.in(this.name).emit('new_round_sauce', {
-					type: 'quote',
-					quote: sauce.quote,
-				});
+			try {
+				sauce = await this.getAndSendRandomSauceToPlayers();
+			} catch (err) {
+				return;  // No need to continue if no sauce available
 			}
 
 			// Listen for players answers
