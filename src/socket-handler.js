@@ -47,6 +47,7 @@ function handleJoinRoom (socket, roomName) {
 	}
 
 	socket.join(room.name);
+	socket.score = 0;  // Initialize player score to 0
 	room.playersSockets.push(socket);
 
 	socket.emit('join_room_success', { roomName });
