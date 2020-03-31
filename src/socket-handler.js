@@ -7,7 +7,7 @@ const Room = require('./models/room');
  * @param {SocketIO.Socket} socket Socket concerned by the operation
  */
 function handleDisconnect (socket) {
-	console.info(`Client disconnected (${socket.id})`);
+	console.info(`[SOCKET] [Socket ${socket.id}] Client disconnected`);
 }
 
 /**
@@ -18,17 +18,38 @@ function handleDisconnect (socket) {
  * @param {String} roomName Name of the room to create
  */
 function handleCreateRoom (socket, roomName) {
-	console.info(`Received request from client ${socket.id} to create room "${roomName}"`);
+	console.info(`[SOCKET] [Socket ${socket.id}] create_room ("${roomName}")`);
 
 	if (!Room.isNameAvailable(roomName)) {
-		socket.emit('create_room_error');
+		socket.emit('create_room_error', { roomName, error: 'Room already exists' });
 	}
 
 	const room = new Room(roomName);
 	socket.join(room.name);
 	room.playersSockets.push(socket);
 
-	// TODO: emit socket event to notify client of room creation success
+	socket.emit('create_room_success', { roomName });
+}
+
+/**
+ * Handles join of a room by a client
+ * @param {SocketIO.Socket} socket Socket to perform the operation with
+ * @param {String} roomName Name of the room to join
+ */
+function handleJoinRoom (socket, roomName) {
+	console.info(`[SOCKET] [Socket ${socket.id}] join_room ("${roomName}")`);
+
+	const room = Room.findRoom(roomName);
+
+	if (!room) {
+		socket.emit('join_room_error', { roomName, error: 'Room not found' });
+		return;
+	}
+
+	socket.join(room.name);
+	room.playersSockets.push(socket);
+
+	socket.emit('join_room_success', { roomName });
 }
 
 /**
@@ -40,7 +61,8 @@ function initSocket (socket) {
 	socket.username = undefined;
 
 	socket.on('disconnect', () => handleDisconnect(socket));
-	socket.on('create_room', ({ roomName }) => { handleCreateRoom(socket, roomName); });
+	socket.on('create_room', ({ roomName }) => handleCreateRoom(socket, roomName));
+	socket.on('join_room', ({ roomName }) => handleJoinRoom(socket, roomName));
 }
 
 
