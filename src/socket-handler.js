@@ -1,5 +1,7 @@
 /* eslint-disable no-param-reassign */
 
+const { remove: _removeFromArray } = require('lodash');
+
 const Room = require('./models/room');
 
 /**
@@ -53,6 +55,36 @@ function handleJoinRoom (socket, roomName) {
 }
 
 /**
+ * Handles leaving a room by a client
+ * 
+ * If the room is not joined, nothing will be done
+ * @param {SocketIO.Socket} socket Socket to perform the operation on
+ * @param {String} roomName Name of the room to leave
+ */
+function handleLeaveRoom (socket, roomName) {
+	console.info(`[SOCKET] [Socket ${socket.id}] leave_room ("${roomName}")`);
+
+	const room = Room.findRoom(roomName);
+	
+	if (!room) {  // If room does not exist
+		socket.emit('leave_room_error', { roomName, error: 'Room not found' });
+		return;
+	}
+	
+	// Check if client has joined the room
+	if (!room.playersSockets.some((client) => client.id === socket.id)) {
+		socket.emit('leave_room_error', { roomName, error: 'Room not joined' });
+		return;
+	}
+
+	// Actually leave room
+	socket.leave(roomName);
+	_removeFromArray(room.playersSockets, (client) => client.id === socket.id);
+
+	socket.emit('leave_room_success', { roomName });
+}
+
+/**
  * Init a socket with custom parameters and bind events to it.
  * @param {SocketIO.Socket} socket Socket to init
  */
@@ -63,8 +95,8 @@ function initSocket (socket) {
 	socket.on('disconnect', () => handleDisconnect(socket));
 	socket.on('create_room', ({ roomName }) => handleCreateRoom(socket, roomName));
 	socket.on('join_room', ({ roomName }) => handleJoinRoom(socket, roomName));
+	socket.on('leave_room', ({ roomName }) => handleLeaveRoom(socket, roomName));
 }
-
 
 module.exports = {
 	initSocket,
