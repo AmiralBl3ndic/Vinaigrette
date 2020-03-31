@@ -70,6 +70,12 @@ class Room {
 		 */
 		this.roundPoints = 5;
 
+		/**
+		 * Whether the game has started
+		 * @type {Boolean}
+		 */
+		this.started = false;
+
 		// Add room to list of rooms
 		Room.rooms.push(this);
 	}
@@ -153,7 +159,7 @@ class Room {
 		const pointsToWin = 100;
 		const roundDuration = 25 * 1000;  // 25 seconds
 		const timeBetweenRounds = 4 * 1000;  // 4 seconds
-
+		
 		// Ensure all players have score set to 0
 		this.playersSockets = this.playersSockets.map((socket) => {
 			socket.score = 0;
@@ -205,6 +211,7 @@ class Room {
 			}, roundDuration);  // TODO: find a way to shorten duration during round
 		};
 
+		this.started = true;
 		startGameRound();  // Start the first game round
 	}
 }
