@@ -16,6 +16,19 @@ class Room {
 	}
 
 	/**
+	 * Get a room instance by its name, if it already has been created
+	 * @param {String} name Name of the room to find
+	 * @returns {Room|null} Room with given name or `null` if none found
+	 */
+	static findRoom (name) {
+		const potentialRooms = this.rooms.filter((room) => room.name === name);
+
+		if (!potentialRooms) return null;
+
+		return potentialRooms[0];
+	}
+
+	/**
 	 * Create a room
 	 * @param {String} name Name of the room
 	 * @throws {Error} When room name is not available
