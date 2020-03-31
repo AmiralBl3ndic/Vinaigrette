@@ -60,6 +60,14 @@ class Room {
 		// Add room to list of rooms
 		Room.rooms.push(this);
 	}
+
+	/**
+	 * Check if any player has reached the number of points required for winning
+	 * @param {Number} points Points to reach to consider victory
+	 */
+	hasAnyPlayerWon (points) {
+		return this.playersSockets.some((player) => player.score >= points);
+	}
 }
 
 module.exports = Room;
