@@ -89,6 +89,39 @@ function handleLeaveRoom (socket, roomName) {
 }
 
 /**
+ * Handle starting a game in given room
+ * @param {SocketIO.Socket} socket 
+ * @param {String} roomName 
+ */
+function handleStartGame (socket, roomName) {
+	console.info(`[SOCKET] [Socket ${socket.id}] start_game ("${roomName}")`);
+
+	const room = Room.findRoom(roomName);
+
+	// Check if room exists
+	if (!room) {
+		socket.emit('start_game_error', { roomName, error: 'Room not found' });
+		return;
+	}
+	
+	// Check if client has joined the room
+	if (!room.playersSockets.some((client) => client.id === socket.id)) {
+		socket.emit('leave_room_error', { roomName, error: 'Room not joined' });
+		return;
+	}
+
+	// Check if a game has already started in room
+	if (room.started) {
+		socket.emit('start_game_error', { roomName, error: 'A game already started in that room' });
+		return;
+	}
+
+	// Start the game in the room
+	socket.emit('start_game_success', { roomName });
+	room.start();
+}
+
+/**
  * Init a socket with custom parameters and bind events to it.
  * @param {SocketIO.Socket} socket Socket to init
  */
@@ -100,6 +133,7 @@ function initSocket (socket) {
 	socket.on('create_room', ({ roomName }) => handleCreateRoom(socket, roomName));
 	socket.on('join_room', ({ roomName }) => handleJoinRoom(socket, roomName));
 	socket.on('leave_room', ({ roomName }) => handleLeaveRoom(socket, roomName));
+	socket.on('start_game', ({ roomName }) => handleStartGame(socket, roomName));
 }
 
 module.exports = {
