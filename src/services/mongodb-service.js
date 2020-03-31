@@ -87,6 +87,33 @@ class MongoDBService {
 
 		return records.length !== 0 ? records[0] : null;
 	}
+
+
+	/**
+	 * Get a random Sauce (either QuoteSauce or ImageSauce)
+	 * 
+	 * @returns {QuoteSauce|ImageSauce} Quote sauce or Image sauce
+	 */
+	static async getRandomSauce () {
+		let sauce;
+
+		if (Math.random() >= 0.5) {  // 50% odds of quote sauce
+			sauce = await MongoDBService.getRandomQuoteSauce();
+
+			if (!sauce) {
+				sauce = await MongoDBService.getRandomImageSauce();
+				if (!sauce) return null;
+			}
+		} else {
+			sauce = await MongoDBService.getRandomImageSauce();
+
+			if (!sauce) {
+				sauce = await MongoDBService.getRandomQuoteSauce();
+			}
+		}
+
+		return sauce;
+	}
 }
 
 module.exports = MongoDBService;
