@@ -222,6 +222,91 @@ object parameter that will give more details about the failure through its `erro
 this response comes with an object parameter that will give you the name of the room
 
 
+## Handling server events
+
+In addition to the socketing responses described for the actions above, the server will 
+send socket events depending on other players activity or game status.
+
+They are described here.
+
+### `rooms_list_update`
+
+The server sends this event whenever a room is added or deleted.
+
+It contains the list of room names as an array in the `roomNames` field of its parameter.
+
+### `no_sauces_available`
+
+The server sends this event whenever there is no sauce available. 
+
+It happens when a game is started but the database does not contain a single record.
+
+### `new_round_sauce`
+
+The server sends this event at each round start. Its parameter contains the sauce information as a json object:
+
+- In case of a quote
+
+```javascript
+{
+    "type": "quote",
+    "quote": "Lorem ipsum dolor sit amet"  // Content of the quote
+}
+```
+
+- In case of an image
+
+```javascript
+{
+    "type": "image",
+    "imageUrl": "https://link-to-the-image.jpg"  // Link to the image
+}
+```
+
+### `scoreboard_update`
+
+The server sends this event at each time a player in your room updates its score (usually because 
+he found the answer).
+
+Its parameter contains the following:
+
+```javascript
+{
+    "player": "johndoe",  // Username of the player to update
+    "found": true,  // Boolean indicating if player found answer (should be true most of the time)
+    "score": 42  // Score of the user
+}
+```
+
+### `round_end`
+
+This event name's is self explanatory: the server sends it at each round end.
+
+### `right_answer`
+
+The server sends this event at each round end, it contains the right answer to the sauce.
+
+**WARNING:** this event will soon be merged with the [`round_end`](#`round_end`) event.
+
+
+### `player_won`
+
+The server sends this event when a player won the game.
+
+Its parameter contaains the following:
+
+```javascript
+{
+    "username": "johndoe",  // Username of winner 
+    "score": 101  // Score of winner
+}
+```
+
+### `game_end`
+
+The server sends this event when the game in your room ended before a player won.
+
+
 ## Troubleshooting
 
 Whenever an error occurs, you should aways be able to retrieve a JSON object describing the nature 
