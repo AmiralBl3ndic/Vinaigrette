@@ -139,7 +139,15 @@ To use it client-side, you can retrieve the JS code exposed at `/socket.io/socke
 
 The available custom actions that the server will understand are the following:
 
-### create_room
+### `set_username`
+
+Set your usernamee for the session.
+
+You must provide a username in the `username` field of the parameter.
+
+**IMPORTANT:** For many events, it is required that you set a username.
+
+### `create_room`
 
 Create a game room. Will produce an error if the room already exists.
 
@@ -161,7 +169,7 @@ object parameter that will give more details about the failure through its `erro
 - `create_room_success` Indicates that the room has been created and that you have joined it, 
 this response comes with an object parameter that will give you the name of the room
 
-### join_room
+### `join_room`
 
 Join an existing game room. Will produce an error if the room does not exist.
 
@@ -183,7 +191,7 @@ object parameter that will give more details about the failure through its `erro
 - `join_room_success` Indicates that the room has been joined, this response comes with an 
 object parameter that will give you the name of the room
 
-### leave_room
+### `leave_room`
 
 Leave an existing game room. Will produce an error if the room does not exist or if you have not 
 joined it.
@@ -205,7 +213,7 @@ object parameter that will give more details about the failure through its `erro
 object parameter that will give you the name of the room
 
 
-### start_game
+### `start_game`
 
 Start the game in the game room. For that, you must have joined a game room.
 
