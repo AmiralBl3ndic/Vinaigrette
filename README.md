@@ -131,6 +131,76 @@ This endpoint produces a JSON object with the structure as follow:
 ```
 
 
+## Available sockets actions
+
+The server uses [socket.io](https://socket.io/) for handling sockets and real-time data.
+
+To use it client-side, you can retrieve the JS code exposed at `/socket.io/socket.io.js`.
+
+The available custom actions that the server will understand are the following:
+
+### create_room
+
+Create a game room. Will produce an error if the room already exists.
+
+#### Parameters
+
+This action takes an object as a parameter, it must have the following properties set:
+
+- `roomName` *(string)*: Name of the room to create
+
+#### Responses
+
+When performed, this action produces a response in the form of a socket event that you should 
+listen to.
+
+- `create_room_error` Indicates that the room could not be created, this response comes with an 
+object parameter that will give more details about the failure through its `error` field
+- `create_room_success` Indicates that the room has been created and that you have joined it, 
+this response comes with an object parameter that will give you the name of the room
+
+### join_room
+
+Join an existing game room. Will produce an error if the room does not exist.
+
+#### Parameters
+
+This action takes an object as a parameter, it must have the following properties set:
+
+- `roomName` *(string)*: Name of the room to join
+
+#### Responses
+
+When performed, this action produces a response in the form of a socket event that you should 
+listen to.
+
+- `join_room_error` Indicates that the room could not be joined, this response comes with an 
+object parameter that will give more details about the failure through its `error` field
+- `join_room_success` Indicates that the room has been joined, this response comes with an 
+object parameter that will give you the name of the room
+
+### leave_room
+
+Leave an existing game room. Will produce an error if the room does not exist or if you have not 
+joined it.
+
+#### Parameters
+
+This action takes an object as a parameter, it must have the following properties set:
+
+- `roomName` *(string)*: Name of the room to leave
+
+#### Responses
+
+When performed, this action produces a response in the form of a socket event that you should 
+listen to.
+
+- `leave_room_error` Indicates that the room could not be left, this response comes with an 
+object parameter that will give more details about the failure through its `error` field
+- `leave_room_success` Indicates that the room has been left, this response comes with an 
+object parameter that will give you the name of the room
+
+
 ## Troubleshooting
 
 Whenever an error occurs, you should aways be able to retrieve a JSON object describing the nature 
