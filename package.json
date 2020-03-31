@@ -1,7 +1,7 @@
 {
-  "name": "tests-custom-popsauce",
-  "version": "0.0.0",
-  "description": "Custom backend PopSauce app",
+  "name": "vinaigrette-server",
+  "version": "0.1.0",
+  "description": "Backend server and API for the Vinaigrette app",
   "main": "src/index.js",
   "author": "Camille Briand <camille.briand@efrei.net> (https://camille-briand.fr/)",
   "license": "MIT",
@@ -12,6 +12,18 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "express-fileupload": "^1.1.6"
+    "express-fileupload": "^1.1.6",
+    "express-rate-limit": "^5.1.1",
+    "mongoose": "^5.9.6",
+    "morgan": "^1.10.0",
+    "remove-accents": "^0.4.2",
+    "sharp": "^0.25.2",
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.1"
   }
 }

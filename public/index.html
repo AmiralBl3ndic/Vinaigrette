@@ -5,14 +5,84 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>File upload test page</title>
+
+	<style>
+		*:not(h1) {
+			font-size: 1.2rem;
+		}
+
+		body {
+			width: 100vw;
+			display: flex;
+			justify-content: center;
+		}
+
+
+		body>div {
+			min-width: 30%;
+			border: solid lightgray 1px;
+			margin: 0 5% 0 5%;
+			padding: 5%;
+		}
+
+		form {
+			display: flex;
+			flex-direction: column;
+		}
+
+		input {
+			margin: 1em 0 1em 0;
+			padding: .2em .5em .2em .5em;
+			border-radius: 10px;
+			border: solid black 1px;
+		}
+
+		input[type="file"] {
+			border: none;
+		}
+
+		input[type="submit"]:hover {
+			cursor: pointer;
+		}
+	</style>
+
 </head>
 
 <body>
-	<h1>Upload a file</h1>
-	<form action="/sauce" enctype="multipart/form-data" method="POST">
-		<input type="file" id="image" name="image" />
-		<input type="submit" value="Upload file" />
-	</form>
+	<div>
+		<h1>Register a new Image Sauce</h1>
+		<form action="/sauce/image" enctype="multipart/form-data" method="POST">
+			<input type="file" id="image" name="image" />
+			<input type="text" id="answer" name="answer" placeholder="Answer" />
+			<input type="submit" value="Add an image sauce" />
+		</form>
+	</div>
+
+	<div>
+		<h1>Register a new Quote Sauce</h1>
+		<form action="/sauce/quote" method="POST">
+			<input type="text" id="quote" name="quote" placeholder="Quote" />
+			<input type="text" id="answer" name="answer" placeholder="Answer" />
+
+			<input type="submit" value="Add a quote sauce" />
+		</form>
+	</div>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		const socket = io('http://localhost:4242');
+		socket.on('connect', () => console.log('Socket connected'));
+
+		socket.on('rooms_list_update', console.log);
+
+		setTimeout(() => {
+			socket.emit('set_username', { username: 'camille' })
+		}, 2000);
+
+		setTimeout(() => {
+			socket.emit('create_room', { roomName: 'test-room' });
+		}, 3000);
+	</script>
 </body>
 
 </html>
