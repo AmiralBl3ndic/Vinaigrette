@@ -201,6 +201,27 @@ object parameter that will give more details about the failure through its `erro
 object parameter that will give you the name of the room
 
 
+### start_game
+
+Start the game in the game room. For that, you must have joined a game room.
+
+#### Parameters
+
+This action takes an object as a parameter, it must have the following properties set:
+
+- `roomName` *(string)*: Name of the room to create
+
+#### Responses
+
+When performed, this action produces a response in the form of a socket event that you should 
+listen to.
+
+- `start_game_error` Indicates that the room could not be created, this response comes with an 
+object parameter that will give more details about the failure through its `error` field
+- `start_game_success` Indicates that the room has been created and that you have joined it, 
+this response comes with an object parameter that will give you the name of the room
+
+
 ## Troubleshooting
 
 Whenever an error occurs, you should aways be able to retrieve a JSON object describing the nature 
