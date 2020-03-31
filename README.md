@@ -143,6 +143,8 @@ The available custom actions that the server will understand are the following:
 
 Create a game room. Will produce an error if the room already exists.
 
+You must have set a valid username before sending this event. Otherwise it will be denied.
+
 #### Parameters
 
 This action takes an object as a parameter, it must have the following properties set:
@@ -162,6 +164,8 @@ this response comes with an object parameter that will give you the name of the 
 ### join_room
 
 Join an existing game room. Will produce an error if the room does not exist.
+
+You must have set a valid username before sending this event. Otherwise it will be denied.
 
 #### Parameters
 
@@ -204,6 +208,8 @@ object parameter that will give you the name of the room
 ### start_game
 
 Start the game in the game room. For that, you must have joined a game room.
+
+You must have set a valid username before sending this event. Otherwise it will be denied.
 
 #### Parameters
 
