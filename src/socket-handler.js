@@ -1,7 +1,5 @@
 /* eslint-disable no-param-reassign */
 
-const { remove: _removeFromArray } = require('lodash');
-
 const Room = require('./models/room');
 
 /**
@@ -79,9 +77,14 @@ function handleLeaveRoom (socket, roomName) {
 
 	// Actually leave room
 	socket.leave(roomName);
-	_removeFromArray(room.playersSockets, (client) => client.id === socket.id);
+	room.playersSockets = room.playersSockets.filter(({ id }) => id !== socket.id);
 
 	socket.emit('leave_room_success', { roomName });
+
+	// Check if room still has players in it (otherwise, delete it)
+	if (room.playersSockets.length === 0) {
+		Room.rooms = Room.rooms.filter(({ name }) => name !== roomName);
+	}
 }
 
 /**
