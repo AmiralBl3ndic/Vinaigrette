@@ -167,6 +167,8 @@ class Room {
 		});
 
 		const startGameRound = async () => {
+			console.info(`[GAME] [Room "${this.name}"] Round started`);
+				
 			this.roundPoints = 5;  // Reset round points
 			
 			let sauce;
@@ -181,6 +183,8 @@ class Room {
 
 			// Wait for round duration before doing anything
 			setTimeout(() => {
+				console.info(`[GAME] [Room "${this.name}"] Round ended`);
+
 				// Stop listening to player answers
 				this.playersSockets.forEach((socket) => socket.removeListener('sauce_answer'));
 
@@ -207,11 +211,14 @@ class Room {
 
 					// Notify all players of winner
 					Room.io.in(this.name).emit('player_won', winningPlayers[0]);
+
+					console.info(`[GAME] [Room "${this.name}"] Game ended`);
 				}
 			}, roundDuration);  // TODO: find a way to shorten duration during round
 		};
 
 		this.started = true;
+		console.info(`[GAME] [Room "${this.name}"] Game started`);
 		startGameRound();  // Start the first game round
 	}
 }
