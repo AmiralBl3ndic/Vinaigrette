@@ -38,7 +38,16 @@ class Room {
 			throw new Error('Room name is already in use!');
 		}
 
+		/**
+		 * Name of the room
+		 * @type {String}
+		 */
 		this.name = name;
+		
+		/**
+		 * Array of sockets corresponding to connected clients
+		 * @type {Array<SocketIO.Socket>}
+		 */
 		this.playersSockets = [];
 
 		// Add room to list of rooms
