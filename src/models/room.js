@@ -1,8 +1,15 @@
 class Room {
+	/**
+	 * SocketIO Server
+	 * 
+	 * @type {SocketIO.Server}
+	 */
 	static io;
 
 	/**
 	 * List of existing rooms
+	 * 
+	 * @type {Array<Room>}
 	 */
 	static rooms = [];
 
