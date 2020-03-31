@@ -1,5 +1,7 @@
 /* eslint-disable no-param-reassign */
 
+const socketEvents = require('./socket-event-names');
+
 const Room = require('./models/room');
 
 /**
@@ -21,14 +23,14 @@ function handleCreateRoom (socket, roomName) {
 	console.info(`[SOCKET] [Socket ${socket.id}] create_room ("${roomName}")`);
 
 	if (!Room.isNameAvailable(roomName)) {
-		socket.emit('create_room_error', { roomName, error: 'Room already exists' });
+		socket.emit(socketEvents.responses.CREATE_ROOM_ERROR, { roomName, error: 'Room already exists' });
 	}
 
 	const room = new Room(roomName);
 	socket.join(room.name);
 	room.playersSockets.push(socket);
 
-	socket.emit('create_room_success', { roomName });
+	socket.emit(socketEvents.responses.CREATE_ROOM_SUCCESS, { roomName });
 }
 
 /**
@@ -42,7 +44,7 @@ function handleJoinRoom (socket, roomName) {
 	const room = Room.findRoom(roomName);
 
 	if (!room) {
-		socket.emit('join_room_error', { roomName, error: 'Room not found' });
+		socket.emit(socketEvents.responses.JOIN_ROOM_ERROR, { roomName, error: 'Room not found' });
 		return;
 	}
 
@@ -50,7 +52,7 @@ function handleJoinRoom (socket, roomName) {
 	socket.score = 0;  // Initialize player score to 0
 	room.playersSockets.push(socket);
 
-	socket.emit('join_room_success', { roomName });
+	socket.emit(socketEvents.responses.JOIN_ROOM_SUCCESS, { roomName });
 }
 
 /**
@@ -66,13 +68,13 @@ function handleLeaveRoom (socket, roomName) {
 	const room = Room.findRoom(roomName);
 	
 	if (!room) {  // If room does not exist
-		socket.emit('leave_room_error', { roomName, error: 'Room not found' });
+		socket.emit(socketEvents.responses.LEAVE_ROOM_ERROR, { roomName, error: 'Room not found' });
 		return;
 	}
 	
 	// Check if client has joined the room
 	if (!room.playersSockets.some((client) => client.id === socket.id)) {
-		socket.emit('leave_room_error', { roomName, error: 'Room not joined' });
+		socket.emit(socketEvents.responses.LEAVE_ROOM_ERROR, { roomName, error: 'Room not joined' });
 		return;
 	}
 
@@ -80,7 +82,7 @@ function handleLeaveRoom (socket, roomName) {
 	socket.leave(roomName);
 	room.playersSockets = room.playersSockets.filter(({ id }) => id !== socket.id);
 
-	socket.emit('leave_room_success', { roomName });
+	socket.emit(socketEvents.responses.LEAVE_ROOM_SUCCESS, { roomName });
 
 	// Check if room still has players in it (otherwise, delete it)
 	if (room.playersSockets.length === 0) {
@@ -100,24 +102,24 @@ function handleStartGame (socket, roomName) {
 
 	// Check if room exists
 	if (!room) {
-		socket.emit('start_game_error', { roomName, error: 'Room not found' });
+		socket.emit(socketEvents.responses.START_GAME_ERROR, { roomName, error: 'Room not found' });
 		return;
 	}
 	
 	// Check if client has joined the room
 	if (!room.playersSockets.some((client) => client.id === socket.id)) {
-		socket.emit('leave_room_error', { roomName, error: 'Room not joined' });
+		socket.emit(socketEvents.responses.START_GAME_ERROR, { roomName, error: 'Room not joined' });
 		return;
 	}
 
 	// Check if a game has already started in room
 	if (room.started) {
-		socket.emit('start_game_error', { roomName, error: 'A game already started in that room' });
+		socket.emit(socketEvents.responses.START_GAME_ERROR, { roomName, error: 'A game already started in that room' });
 		return;
 	}
 
 	// Start the game in the room
-	socket.emit('start_game_success', { roomName });
+	socket.emit(socketEvents.responses.START_GAME_SUCCESS, { roomName });
 	room.start();
 }
 
@@ -130,10 +132,10 @@ function initSocket (socket) {
 	socket.username = undefined;
 
 	socket.on('disconnect', () => handleDisconnect(socket));
-	socket.on('create_room', ({ roomName }) => handleCreateRoom(socket, roomName));
-	socket.on('join_room', ({ roomName }) => handleJoinRoom(socket, roomName));
-	socket.on('leave_room', ({ roomName }) => handleLeaveRoom(socket, roomName));
-	socket.on('start_game', ({ roomName }) => handleStartGame(socket, roomName));
+	socket.on(socketEvents.requests.CREATE_ROOM, ({ roomName }) => handleCreateRoom(socket, roomName));
+	socket.on(socketEvents.requests.JOIN_ROOM, ({ roomName }) => handleJoinRoom(socket, roomName));
+	socket.on(socketEvents.requests.LEAVE_ROOM, ({ roomName }) => handleLeaveRoom(socket, roomName));
+	socket.on(socketEvents.requests.START_GAME, ({ roomName }) => handleStartGame(socket, roomName));
 }
 
 module.exports = {
