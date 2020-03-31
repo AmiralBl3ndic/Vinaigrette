@@ -161,8 +161,9 @@ class Room {
 		});
 
 		const startGameRound = async () => {
+			this.roundPoints = 5;  // Reset round points
+			
 			let sauce;
-
 			try {
 				sauce = await this.getAndSendRandomSauceToPlayers();
 			} catch (err) {
