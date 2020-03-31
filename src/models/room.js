@@ -116,6 +116,37 @@ class Room {
 	}
 
 	/**
+	 * Processes the answer sent by the player
+	 * @param {SocketIO.Socket} socket Player's socket
+	 * @param {String} answer Answer sent by the player
+	 * @param {String} rightAnswer Awaited answer
+	 */
+	processPlayerAnswer (socket, answer, rightAnswer) {
+		if (formatAnswer(answer).equals(rightAnswer)) {
+			// Increase player score
+			socket.points += this.roundPoints;
+					
+			// Decrease points won by next player (until it gets under 3 points)
+			if (this.roundPoints >= 3) {
+				this.roundPoints -= 2;
+			}
+
+			// Notify player of good answer
+			socket.emit('good_answer');
+
+			// Notify all players of scoreboard update
+			Room.io.in(this.name).emit('scoreboard_update', {
+				player: socket.username,
+				found: true,
+				score: socket.score,
+			});
+		} else {
+			// Notify player of wrong answer
+			socket.emit('wrong_answer');
+		}
+	}
+
+	/**
 	 * Start a game in the room
 	 */
 	async start () {
@@ -139,30 +170,7 @@ class Room {
 			}
 
 			// Listen for players answers
-			this.playersSockets.forEach((socket) => socket.on('sauce_answer', (answer) => {
-				if (formatAnswer(answer).equals(sauce.answer)) {
-					// Increase player score
-					socket.points += this.roundPoints;
-					
-					// Decrease points won by next player (until it gets under 3 points)
-					if (this.roundPoints >= 3) {
-						this.roundPoints -= 2;
-					}
-
-					// Notify player of good answer
-					socket.emit('good_answer');
-
-					// Notify all players of scoreboard update
-					Room.io.in(this.name).emit('scoreboard_update', {
-						player: socket.username,
-						found: true,
-						score: socket.score,
-					});
-				} else {
-					// Notify player of wrong answer
-					socket.emit('wrong_answer');
-				}
-			}));
+			this.playersSockets.forEach((socket) => socket.on('sauce_answer', (answer) => this.processPlayerAnswer(socket, answer, sauce.answer)));
 
 			// Wait for round duration before doing anything
 			setTimeout(() => {
