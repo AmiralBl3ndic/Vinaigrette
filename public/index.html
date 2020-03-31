@@ -73,6 +73,12 @@
 		const socket = io('http://localhost:4242');
 		socket.on('connect', () => console.log('Socket connected'));
 
+		socket.on('rooms_list_update', console.log);
+
+		setTimeout(() => {
+			socket.emit('set_username', { username: 'camille' })
+		}, 2000);
+
 		setTimeout(() => {
 			socket.emit('create_room', { roomName: 'test-room' });
 		}, 3000);
