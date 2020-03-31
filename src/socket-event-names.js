@@ -8,6 +8,7 @@ module.exports = {
 		SAUCE_ANSWER: 'sauce_answer',
 	},
 	responses: {
+		ROOMS_LIST_UPDATE: 'rooms_list_update',
 		CREATE_ROOM_SUCCESS: 'create_room_success',
 		CREATE_ROOM_ERROR: 'create_room_error',
 		JOIN_ROOM_SUCCESS: 'join_room_success',

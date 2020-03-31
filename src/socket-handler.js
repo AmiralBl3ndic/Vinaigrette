@@ -33,8 +33,15 @@ function handleSetUsername (socket, username) {
 function handleCreateRoom (socket, roomName) {
 	console.info(`[SOCKET] [Socket ${socket.id}] create_room ("${roomName}")`);
 
+	// Check that user has set its username
+	if (!socket.username) {
+		socket.emit(socketEvents.responses.CREATE_ROOM_ERROR, { roomName, error: 'You must have a username to create a room' });
+		return;
+	}
+
 	if (!Room.isNameAvailable(roomName)) {
 		socket.emit(socketEvents.responses.CREATE_ROOM_ERROR, { roomName, error: 'Room already exists' });
+		return;
 	}
 
 	const room = new Room(roomName);
@@ -51,6 +58,12 @@ function handleCreateRoom (socket, roomName) {
  */
 function handleJoinRoom (socket, roomName) {
 	console.info(`[SOCKET] [Socket ${socket.id}] join_room ("${roomName}")`);
+
+	// Check that user has set its username
+	if (!socket.username) {
+		socket.emit(socketEvents.responses.JOIN_ROOM_ERROR, { roomName, error: 'You must have a username to join a room' });
+		return;
+	}
 
 	const room = Room.findRoom(roomName);
 
@@ -109,6 +122,12 @@ function handleLeaveRoom (socket, roomName) {
 function handleStartGame (socket, roomName) {
 	console.info(`[SOCKET] [Socket ${socket.id}] start_game ("${roomName}")`);
 
+	// Check that user has set its username
+	if (!socket.username) {
+		socket.emit(socketEvents.responses.START_GAME_ERROR, { roomName, error: 'You must have a username to start a game' });
+		return;
+	}
+
 	const room = Room.findRoom(roomName);
 
 	// Check if room exists
@@ -135,12 +154,23 @@ function handleStartGame (socket, roomName) {
 }
 
 /**
+ * Send the list of rooms to user
+ * @param {SocketIO.Socket} socket Socket to use
+ */
+function sendRoomsList (socket) {
+	const roomNames = Room.rooms.map((room) => room.name);
+	socket.emit(socketEvents.responses.ROOMS_LIST_UPDATE, { roomNames });
+}
+
+/**
  * Init a socket with custom parameters and bind events to it.
  * @param {SocketIO.Socket} socket Socket to init
  */
 function initSocket (socket) {
 	socket.score = undefined;
 	socket.username = undefined;
+
+	sendRoomsList(socket);
 
 	socket.on('disconnect', () => handleDisconnect(socket));
 	socket.on(socketEvents.requests.SET_USERNAME, ({ username }) => handleSetUsername(socket, username));
