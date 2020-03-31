@@ -12,11 +12,13 @@ function handleDisconnect (socket) {
 
 /**
  * Handles creation of a room by a client
+ * 
+ * This will attempt to create a room and join it if succeeds
  * @param {SocketIO.Socket} socket Socket to perform the operation with
  * @param {String} roomName Name of the room to create
  */
 function handleCreateRoom (socket, roomName) {
-	console.info('Received request to create room:', roomName);
+	console.info(`Received request from client ${socket.id} to create room "${roomName}"`);
 
 	if (!Room.isNameAvailable(roomName)) {
 		socket.emit('create_room_error');
@@ -25,6 +27,8 @@ function handleCreateRoom (socket, roomName) {
 	const room = new Room(roomName);
 	socket.join(room.name);
 	room.playersSockets.push(socket);
+
+	// TODO: emit socket event to notify client of room creation success
 }
 
 /**
