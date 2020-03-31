@@ -209,7 +209,7 @@ Start the game in the game room. For that, you must have joined a game room.
 
 This action takes an object as a parameter, it must have the following properties set:
 
-- `roomName` *(string)*: Name of the room to create
+- `roomName` *(string)*: Name of the room to start the game in
 
 #### Responses
 
