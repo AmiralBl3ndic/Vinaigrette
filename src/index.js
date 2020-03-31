@@ -11,7 +11,7 @@ const socketio = require('socket.io');
 const bodyParser = require('body-parser');
 const serverConfig = require('./server.config');
 
-const SocketHandler = require('./socket-handler');
+const { initSocket } = require('./socket-handler');
 const Room = require('./models/room');
 
 /** *******************************************************
@@ -65,7 +65,11 @@ mongoose.connect(serverConfig.mongoConnectionString, {
 		const io = socketio.listen(server);
 		Room.io = io;
 
-		io.on('connection', (socket) => new SocketHandler(socket).handle());
+		io.on('connection', (socket) => {
+			console.info(`Client connected (${socket.id})`);
+
+			initSocket(socket);
+		});
 	})
 	.catch((err) => {
 		console.error("Can't connect to MongoDB database:", err);

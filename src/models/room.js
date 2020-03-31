@@ -18,6 +18,7 @@ class Room {
 	/**
 	 * Create a room
 	 * @param {String} name Name of the room
+	 * @throws {Error} When room name is not available
 	 */
 	constructor (name) {
 		if (!Room.isNameAvailable(name)) {
@@ -25,7 +26,7 @@ class Room {
 		}
 
 		this.name = name;
-		this.connectedPlayers = [];
+		this.playersSockets = [];
 
 		// Add room to list of rooms
 		Room.rooms.push(this);
