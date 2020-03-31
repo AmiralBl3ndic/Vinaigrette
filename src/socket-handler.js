@@ -13,6 +13,17 @@ function handleDisconnect (socket) {
 }
 
 /**
+ * Sets the username for a given socket
+ * @param {SocketIO.Socket} socket Socket to perform the actions on
+ * @param {String} username Name to set
+ */
+function handleSetUsername (socket, username) {
+	console.info(`[SOCKET] [Socket ${socket.id}] set_username ("${username}")`);
+
+	socket.username = username;
+}
+
+/**
  * Handles creation of a room by a client
  * 
  * This will attempt to create a room and join it if succeeds
@@ -132,6 +143,7 @@ function initSocket (socket) {
 	socket.username = undefined;
 
 	socket.on('disconnect', () => handleDisconnect(socket));
+	socket.on(socketEvents.requests.SET_USERNAME, ({ username }) => handleSetUsername(socket, username));
 	socket.on(socketEvents.requests.CREATE_ROOM, ({ roomName }) => handleCreateRoom(socket, roomName));
 	socket.on(socketEvents.requests.JOIN_ROOM, ({ roomName }) => handleJoinRoom(socket, roomName));
 	socket.on(socketEvents.requests.LEAVE_ROOM, ({ roomName }) => handleLeaveRoom(socket, roomName));

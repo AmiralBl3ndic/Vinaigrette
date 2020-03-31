@@ -3,6 +3,7 @@ module.exports = {
 		CREATE_ROOM: 'create_room',
 		JOIN_ROOM: 'join_room',
 		LEAVE_ROOM: 'leave_room',
+		SET_USERNAME: 'set_username',
 		START_GAME: 'start_game',
 		SAUCE_ANSWER: 'sauce_answer',
 	},
