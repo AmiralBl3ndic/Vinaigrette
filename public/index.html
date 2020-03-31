@@ -72,6 +72,10 @@
 	<script>
 		const socket = io('http://localhost:4242');
 		socket.on('connect', () => console.log('Socket connected'));
+
+		setTimeout(() => {
+			socket.emit('create_room', { roomName: 'test-room' });
+		}, 3000);
 	</script>
 </body>
 
