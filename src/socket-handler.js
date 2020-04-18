@@ -49,6 +49,7 @@ function handleCreateRoom (socket, roomName) {
 	room.playersSockets.push(socket);
 
 	socket.emit(socketEvents.responses.CREATE_ROOM_SUCCESS, { roomName });
+	socket.emit(socketEvents.SCOREBOARD_UPDATE, { scoreboard: room.getScoreboard() });
 }
 
 /**
@@ -77,6 +78,7 @@ function handleJoinRoom (socket, roomName) {
 	room.playersSockets.push(socket);
 
 	socket.emit(socketEvents.responses.JOIN_ROOM_SUCCESS, { roomName });
+	socket.emit(socketEvents.SCOREBOARD_UPDATE, { scoreboard: room.getScoreboard() });
 }
 
 /**

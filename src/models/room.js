@@ -83,6 +83,14 @@ class Room {
 	}
 
 	/**
+	 * Get the current scoreboard of players in the room
+	 * @returns {Array<{name: String, score: Number}>} Current scoreboard of the room
+	 */
+	getScoreboard () {
+		return this.playersSockets.map(({ name, score, found }) => ({ name, score, found: found || false }));
+	}
+
+	/**
 	 * Check if any player has reached the number of points required for winning
 	 * @param {Number} points Points to reach to consider victory
 	 */
@@ -139,15 +147,13 @@ class Room {
 				this.roundPoints -= 2;
 			}
 
+			socket.found = true;
+
 			// Notify player of good answer
 			socket.emit(serverResponse.GOOD_ANSWER);
 
 			// Notify all players of scoreboard update
-			Room.io.in(this.name).emit(serverResponse.SCOREBOARD_UPDATE, {
-				player: socket.username,
-				found: true,
-				score: socket.score,
-			});
+			Room.io.in(this.name).emit(serverResponse.SCOREBOARD_UPDATE, { scoreboard: this.getScoreboard() });
 		} else {
 			// Notify player of wrong answer
 			socket.emit(serverResponse.WRONG_ANSWER);
@@ -165,6 +171,7 @@ class Room {
 		// Ensure all players have score set to 0
 		this.playersSockets = this.playersSockets.map((socket) => {
 			socket.score = 0;
+			socket.found = false;
 			return socket;
 		});
 
@@ -179,6 +186,15 @@ class Room {
 			} catch (err) {
 				return;  // No need to continue if no sauce available
 			}
+
+			// Ensure all players have their "found status" set to false (not found)
+			this.playersSockets = this.playersSockets.map((socket) => {
+				socket.found = false;
+				return socket;
+			});
+
+			// Send a scoreboard update
+			Room.io.in(this.name).emit(serverResponse.SCOREBOARD_UPDATE, { scoreboard: this.getScoreboard() });
 
 			// Listen for players answers
 			this.playersSockets.forEach(
