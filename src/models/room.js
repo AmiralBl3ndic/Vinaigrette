@@ -84,10 +84,10 @@ class Room {
 
 	/**
 	 * Get the current scoreboard of players in the room
-	 * @returns {Array<{name: String, score: Number}>} Current scoreboard of the room
+	 * @returns {Array<{username: String, score: Number, found: Boolean}>} Current scoreboard of the room
 	 */
 	getScoreboard () {
-		return this.playersSockets.map(({ name, score, found }) => ({ name, score, found: found || false }));
+		return this.playersSockets.map(({ username, score, found }) => ({ player: username, score, found: found || false }));
 	}
 
 	/**

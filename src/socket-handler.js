@@ -60,10 +60,14 @@ function handleCreateRoom (socket, roomName) {
 
 	const room = new Room(roomName);
 	socket.join(room.name);
+	socket.score = 0;  // Initialize player score to 0
+	socket.found = false;  // Initialize player found status to false (not found)
 	room.playersSockets.push(socket);
 
+	const scoreboard = room.getScoreboard();
+
 	socket.emit(socketEvents.responses.CREATE_ROOM_SUCCESS, { roomName });
-	socket.emit(socketEvents.SCOREBOARD_UPDATE, { scoreboard: room.getScoreboard() });
+	socket.emit(socketEvents.responses.SCOREBOARD_UPDATE, { scoreboard });
 
 	sendRoomsList();
 }
@@ -91,10 +95,13 @@ function handleJoinRoom (socket, roomName) {
 
 	socket.join(room.name);
 	socket.score = 0;  // Initialize player score to 0
+	socket.found = false;  // Initialize player found status to false (not found)
 	room.playersSockets.push(socket);
 
+	const scoreboard = room.getScoreboard();
+
 	socket.emit(socketEvents.responses.JOIN_ROOM_SUCCESS, { roomName });
-	socket.emit(socketEvents.SCOREBOARD_UPDATE, { scoreboard: room.getScoreboard() });
+	socket.emit(socketEvents.responses.SCOREBOARD_UPDATE, { scoreboard });
 }
 
 /**
