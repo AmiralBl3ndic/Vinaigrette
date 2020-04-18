@@ -141,7 +141,7 @@ The available custom actions that the server will understand are the following:
 
 ### `set_username`
 
-Set your usernamee for the session.
+Set your username for the session.
 
 #### Parameters
 
@@ -169,7 +169,8 @@ listen to.
 - `create_room_error` Indicates that the room could not be created, this response comes with an 
 object parameter that will give more details about the failure through its `error` field
 - `create_room_success` Indicates that the room has been created and that you have joined it, 
-this response comes with an object parameter that will give you the name of the room
+this response comes with an object parameter that will give you the name of the room with the 
+`roomName` field and whether a game has started in that room with the `started` field.
 
 ### `join_room`
 
@@ -190,8 +191,9 @@ listen to.
 
 - `join_room_error` Indicates that the room could not be joined, this response comes with an 
 object parameter that will give more details about the failure through its `error` field
-- `join_room_success` Indicates that the room has been joined, this response comes with an 
-object parameter that will give you the name of the room
+- `join_room_success` Indicates that the room has been created and that you have joined it, 
+this response comes with an object parameter that will give you the name of the room with the 
+`roomName` field and whether a game has started in that room with the `started` field.
 
 ### `leave_room`
 
