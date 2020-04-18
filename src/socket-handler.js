@@ -66,7 +66,7 @@ function handleCreateRoom (socket, roomName) {
 
 	const scoreboard = room.getScoreboard();
 
-	socket.emit(socketEvents.responses.CREATE_ROOM_SUCCESS, { roomName });
+	socket.emit(socketEvents.responses.CREATE_ROOM_SUCCESS, { roomName, started: room.started });
 	socket.emit(socketEvents.responses.SCOREBOARD_UPDATE, { scoreboard });
 
 	sendRoomsList();
@@ -100,7 +100,7 @@ function handleJoinRoom (socket, roomName) {
 
 	const scoreboard = room.getScoreboard();
 
-	socket.emit(socketEvents.responses.JOIN_ROOM_SUCCESS, { roomName });
+	socket.emit(socketEvents.responses.JOIN_ROOM_SUCCESS, { roomName, started: room.started });
 	Room.io.in(room.name).emit(socketEvents.responses.SCOREBOARD_UPDATE, { scoreboard });
 }
 
