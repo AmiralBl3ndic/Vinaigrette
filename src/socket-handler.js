@@ -5,6 +5,20 @@ const socketEvents = require('./socket-event-names');
 const Room = require('./models/room');
 
 /**
+ * Send the list of rooms to user
+ * @param {SocketIO.Socket} socket Socket to use
+ */
+function sendRoomsList (socket) {
+	const roomNames = Room.rooms.map((room) => room.name);
+
+	if (socket) {
+		socket.emit(socketEvents.responses.ROOMS_LIST_UPDATE, { roomNames });
+	} else {
+		Room.io.emit(socketEvents.responses.ROOMS_LIST_UPDATE, { roomNames });
+	}
+}
+
+/**
  * Handle a client disconnection
  * @param {SocketIO.Socket} socket Socket concerned by the operation
  */
@@ -50,6 +64,8 @@ function handleCreateRoom (socket, roomName) {
 
 	socket.emit(socketEvents.responses.CREATE_ROOM_SUCCESS, { roomName });
 	socket.emit(socketEvents.SCOREBOARD_UPDATE, { scoreboard: room.getScoreboard() });
+
+	sendRoomsList();
 }
 
 /**
@@ -153,15 +169,6 @@ function handleStartGame (socket, roomName) {
 	// Start the game in the room
 	socket.emit(socketEvents.responses.START_GAME_SUCCESS, { roomName });
 	room.start();
-}
-
-/**
- * Send the list of rooms to user
- * @param {SocketIO.Socket} socket Socket to use
- */
-function sendRoomsList (socket) {
-	const roomNames = Room.rooms.map((room) => room.name);
-	socket.emit(socketEvents.responses.ROOMS_LIST_UPDATE, { roomNames });
 }
 
 /**
