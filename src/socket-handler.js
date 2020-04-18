@@ -129,6 +129,7 @@ function handleLeaveRoom (socket, roomName) {
 	// Check if room still has players in it (otherwise, delete it)
 	if (room.playersSockets.length === 0) {
 		Room.rooms = Room.rooms.filter(({ name }) => name !== roomName);
+		sendRoomsList();
 	}
 }
 
