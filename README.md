@@ -305,9 +305,13 @@ Its parameter contains the following:
 
 ```javascript
 {
-    "player": "johndoe",  // Username of the player to update
-    "found": true,  // Boolean indicating if player found answer (should be true most of the time)
-    "score": 42  // Score of the user
+    scoreboard: [
+        {
+            "player": "johndoe",  // Username of the player to update
+            "found": true,  // Boolean indicating if player found answer (should be true most of the time)
+            "score": 42  // Score of the user
+        }
+    ]
 }
 ```
 
