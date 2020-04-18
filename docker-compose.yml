@@ -1,7 +1,6 @@
 version: "3.7"
 services:
   vinaigrette:
-    image: amiralblndic/vinaigrette-server:latest
     container_name: vinaigrette-server
     restart: always
     build: ./
@@ -19,9 +18,11 @@ services:
     image: mongo:latest
     container_name: vinaigrette-mongo
     restart: always
-    environment:
-      MONGO_INITDB_DATABASE: vinaigrette
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: ~%GgFX.5Kw;evNi
+    env_file:
+      - mongodb.env
+    # environment:
+    #   MONGO_INITDB_DATABASE: vinaigrette
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: ~%GgFX.5Kw;evNi
     volumes:
       - "./mongodb-data:/data/db"
