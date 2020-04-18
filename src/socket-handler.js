@@ -101,7 +101,7 @@ function handleJoinRoom (socket, roomName) {
 	const scoreboard = room.getScoreboard();
 
 	socket.emit(socketEvents.responses.JOIN_ROOM_SUCCESS, { roomName });
-	socket.emit(socketEvents.responses.SCOREBOARD_UPDATE, { scoreboard });
+	Room.io.in(room.name).emit(socketEvents.responses.SCOREBOARD_UPDATE, { scoreboard });
 }
 
 /**
@@ -131,7 +131,10 @@ function handleLeaveRoom (socket, roomName) {
 	socket.leave(roomName);
 	room.playersSockets = room.playersSockets.filter(({ id }) => id !== socket.id);
 
+	const scoreboard = room.getScoreboard();
+
 	socket.emit(socketEvents.responses.LEAVE_ROOM_SUCCESS, { roomName });
+	Room.io.in(room.name).emit(socketEvents.responses.SCOREBOARD_UPDATE, { scoreboard });
 
 	// Check if room still has players in it (otherwise, delete it)
 	if (room.playersSockets.length === 0) {
