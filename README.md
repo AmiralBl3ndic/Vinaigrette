@@ -340,6 +340,12 @@ The server sends this event at each round end, it contains the right answer to t
 
 **WARNING:** this event will soon be merged with the [`round_end`](#`round_end`) event.
 
+### `timer_update`
+
+This event is sent by the server to all the players in a room when the remaining time to 
+guess the sauce has changed (every second, then).
+
+It only contains a number representing the remaining time in seconds.
 
 ### `player_won`
 
