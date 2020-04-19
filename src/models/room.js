@@ -187,8 +187,6 @@ class Room {
 		const roundDuration = 25 * 1000;  // 25 seconds
 		const timeBetweenRounds = 4 * 1000;  // 4 seconds
 		
-		this.remainingRoundTime = roundDuration;
-		
 		if (this.started) {
 			return;   // Do not start a game in the same room again
 		}
@@ -220,6 +218,8 @@ class Room {
 				socket.found = false;
 				return socket;
 			});
+
+			this.remainingRoundTime = roundDuration / 1000;
 
 			const remainingTimeInterval = setInterval(() => {
 				this.remainingRoundTime -= 1;
