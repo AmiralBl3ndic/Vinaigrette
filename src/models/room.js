@@ -187,6 +187,8 @@ class Room {
 		const roundDuration = 25 * 1000;  // 25 seconds
 		const timeBetweenRounds = 4 * 1000;  // 4 seconds
 		
+		this.remainingRoundTime = roundDuration;
+		
 		if (this.started) {
 			return;   // Do not start a game in the same room again
 		}
@@ -218,6 +220,15 @@ class Room {
 				socket.found = false;
 				return socket;
 			});
+
+			const remainingTimeInterval = setInterval(() => {
+				this.remainingRoundTime -= 1;
+				if (this.remainingRoundTime === 0) {
+					clearInterval(remainingTimeInterval);
+				} else {
+					Room.io.in(this.name).emit(serverResponse.TIMER_UPDATE, this.remainingRoundTime);
+				}
+			}, 1000);
 
 			// Send a scoreboard update
 			Room.io.in(this.name).emit(serverResponse.SCOREBOARD_UPDATE, { scoreboard: this.getScoreboard() });

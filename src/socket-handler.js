@@ -108,6 +108,7 @@ function handleJoinRoom (socket, roomName) {
 		const type = currentSauce.quote ? 'quote' : 'image';
 		
 		socket.emit(socketEvents.responses.NEW_ROUND_SAUCE, { type, ...currentSauce });
+		socket.emit(socketEvents.responses.TIMER_UPDATE, room.remainingRoundTime);
 	}
 }
 
