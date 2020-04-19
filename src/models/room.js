@@ -103,7 +103,7 @@ class Room {
 	 * @returns {Array<{username: String, score: Number, found: Boolean}>} Current scoreboard of the room
 	 */
 	getScoreboard () {
-		return this.playersSockets.map(({ username, score, found }) => ({ player: username, score, found: found || false }));
+		return this.playersSockets.map(({ username, points, found }) => ({ player: username, score: points, found: found || false }));
 	}
 
 	/**
@@ -151,13 +151,21 @@ class Room {
 	}
 
 	/**
+	 * Get the function that listens and processes a player answer
+	 * @param {SocketIO.Socket} socket Socket to bind the action to
+	 */
+	getSocketAnswerListenerFunction (socket) {
+		return (answer) => this.processPlayerAnswer(socket, answer, this.currentSauce.answer);
+	}
+
+	/**
 	 * Processes the answer sent by the player
 	 * @param {SocketIO.Socket} socket Player's socket
 	 * @param {String} answer Answer sent by the player
 	 * @param {String} rightAnswer Awaited answer
 	 */
 	processPlayerAnswer (socket, answer, rightAnswer) {
-		if (formatAnswer(answer).equals(rightAnswer)) {
+		if (formatAnswer(answer) === rightAnswer) {
 			// Increase player score
 			socket.points += this.roundPoints;
 					
@@ -193,7 +201,7 @@ class Room {
 		
 		// Ensure all players have score set to 0
 		this.playersSockets = this.playersSockets.map((socket) => {
-			socket.score = 0;
+			socket.points = 0;
 			socket.found = false;
 			return socket;
 		});
@@ -223,11 +231,10 @@ class Room {
 
 			const remainingTimeInterval = setInterval(() => {
 				this.remainingRoundTime -= 1;
-				if (this.remainingRoundTime === 0) {
+				if (this.remainingRoundTime <= 0) {
 					clearInterval(remainingTimeInterval);
-				} else {
-					Room.io.in(this.name).emit(serverResponse.TIMER_UPDATE, this.remainingRoundTime);
 				}
+				Room.io.in(this.name).emit(serverResponse.TIMER_UPDATE, this.remainingRoundTime);
 			}, 1000);
 
 			// Send a scoreboard update
@@ -235,7 +242,7 @@ class Room {
 
 			// Listen for players answers
 			this.playersSockets.forEach((socket) => {
-				socket.answerListener = (answer) => this.processPlayerAnswer(socket, answer, sauce.answer);
+				socket.answerListener = this.getSocketAnswerListenerFunction(socket);
 				socket.on(clientEvent.SAUCE_ANSWER, socket.answerListener);
 			});
 

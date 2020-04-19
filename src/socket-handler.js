@@ -60,7 +60,7 @@ function handleCreateRoom (socket, roomName) {
 
 	const room = new Room(roomName);
 	socket.join(room.name);
-	socket.score = 0;  // Initialize player score to 0
+	socket.points = 0;  // Initialize player score to 0
 	socket.found = false;  // Initialize player found status to false (not found)
 	room.playersSockets.push(socket);
 
@@ -94,8 +94,13 @@ function handleJoinRoom (socket, roomName) {
 	}
 
 	socket.join(room.name);
-	socket.score = 0;  // Initialize player score to 0
+	socket.points = 0;  // Initialize player score to 0
 	socket.found = false;  // Initialize player found status to false (not found)
+	if (room.started) {
+		// Bind an answer listener to the user's socket
+		socket.answerListener = room.getSocketAnswerListenerFunction(socket);
+		socket.on(socketEvents.requests.SAUCE_ANSWER, socket.answerListener);
+	}
 	room.playersSockets.push(socket);
 
 	const scoreboard = room.getScoreboard();
@@ -200,7 +205,7 @@ function handleStartGame (socket, roomName) {
  * @param {SocketIO.Socket} socket Socket to init
  */
 function initSocket (socket) {
-	socket.score = undefined;
+	socket.points = 0;
 	socket.username = undefined;
 
 	sendRoomsList(socket);
