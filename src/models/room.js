@@ -168,6 +168,10 @@ class Room {
 		const roundDuration = 25 * 1000;  // 25 seconds
 		const timeBetweenRounds = 4 * 1000;  // 4 seconds
 		
+		if (this.started) {
+			return;   // Do not start a game in the same room again
+		}
+		
 		// Ensure all players have score set to 0
 		this.playersSockets = this.playersSockets.map((socket) => {
 			socket.score = 0;
