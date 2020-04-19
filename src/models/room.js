@@ -170,7 +170,7 @@ class Room {
 	 */
 	async start () {
 		const pointsToWin = 100;
-		const roundDuration = 10 * 1000;  // 25 seconds
+		const roundDuration = 25 * 1000;  // 25 seconds
 		const timeBetweenRounds = 4 * 1000;  // 4 seconds
 		
 		if (this.started) {
