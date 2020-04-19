@@ -197,16 +197,17 @@ class Room {
 			Room.io.in(this.name).emit(serverResponse.SCOREBOARD_UPDATE, { scoreboard: this.getScoreboard() });
 
 			// Listen for players answers
-			this.playersSockets.forEach(
-				(socket) => socket.on(clientEvent.SAUCE_ANSWER, (answer) => this.processPlayerAnswer(socket, answer, sauce.answer)),
-			);
+			this.playersSockets.forEach((socket) => {
+				socket.answerListener = (answer) => this.processPlayerAnswer(socket, answer, sauce.answer);
+				socket.on(clientEvent.SAUCE_ANSWER, socket.answerListener);
+			});
 
 			// Wait for round duration before doing anything
 			setTimeout(() => {
 				console.info(`[GAME] [Room "${this.name}"] Round ended`);
 
 				// Stop listening to player answers
-				this.playersSockets.forEach((socket) => socket.removeListener(clientEvent.SAUCE_ANSWER));
+				this.playersSockets.forEach((socket) => socket.off(clientEvent.SAUCE_ANSWER, socket.answerListener));
 
 				// Notify players of round end
 				Room.io.in(this.name).emit(serverResponse.ROUND_END);
