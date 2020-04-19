@@ -276,6 +276,19 @@ The server sends this event whenever there is no sauce available.
 
 It happens when a game is started but the database does not contain a single record.
 
+### `game_start`
+
+The server sends this event to all players in a room when a game is started in the room 
+the players are in.
+
+This event does not carry any data.
+
+### `game_end`
+
+The server sends this event when the game in your room ended before a player won.
+
+This event does not carry any data.
+
 ### `new_round_sauce`
 
 The server sends this event at each round start. Its parameter contains the sauce information as a json object:
@@ -340,10 +353,6 @@ Its parameter contaains the following:
     "score": 101  // Score of winner
 }
 ```
-
-### `game_end`
-
-The server sends this event when the game in your room ended before a player won.
 
 
 ## Troubleshooting

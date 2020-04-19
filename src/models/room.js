@@ -175,6 +175,9 @@ class Room {
 			return socket;
 		});
 
+		// Notify all players of the room that the game has started
+		Room.io.in(this.name).emit(serverResponse.GAME_START);
+
 		const startGameRound = async () => {
 			console.info(`[GAME] [Room "${this.name}"] Round started`);
 				

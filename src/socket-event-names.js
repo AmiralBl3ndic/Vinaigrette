@@ -25,6 +25,7 @@ module.exports = {
 		ROUND_END: 'round_end',
 		RIGHT_ANSWER: 'right_answer',
 		PLAYER_WON: 'player_won',
+		GAME_START: 'game_start',
 		GAME_END: 'game_end',
 	},
 };
