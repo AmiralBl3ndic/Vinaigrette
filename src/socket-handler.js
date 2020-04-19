@@ -102,6 +102,13 @@ function handleJoinRoom (socket, roomName) {
 
 	socket.emit(socketEvents.responses.JOIN_ROOM_SUCCESS, { roomName, started: room.started });
 	Room.io.in(room.name).emit(socketEvents.responses.SCOREBOARD_UPDATE, { scoreboard });
+
+	if (room.started) {
+		const { currentSauce } = room;
+		const type = currentSauce.quote ? 'quote' : 'image';
+		
+		socket.emit(socketEvents.responses.NEW_ROUND_SAUCE, { type, ...currentSauce });
+	}
 }
 
 /**

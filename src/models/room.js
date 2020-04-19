@@ -78,10 +78,21 @@ class Room {
 		this.started = false;
 
 		/**
-		 * 
 		 * @type {Function}
 		 */
 		this.roundTimeout = null;
+
+		/**
+		 * Current sauce to send to the players
+		 * @type {Object}
+		 */
+		this.currentSauce = null;
+
+		/**
+		 * Time remaining to play during the current round
+		 * @type {Number}
+		 */
+		this.remainingRoundTime = 0;
 
 		// Add room to list of rooms
 		Room.rooms.push(this);
@@ -112,6 +123,9 @@ class Room {
 	async getAndSendRandomSauceToPlayers () {
 		// Get a random sauce
 		const sauce = await MongoDBService.getRandomSauce();
+
+		// Save sauce
+		this.currentSauce = sauce;
 
 		// If no sauce found
 		if (!sauce) {

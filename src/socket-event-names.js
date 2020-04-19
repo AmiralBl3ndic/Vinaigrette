@@ -27,5 +27,6 @@ module.exports = {
 		PLAYER_WON: 'player_won',
 		GAME_START: 'game_start',
 		GAME_END: 'game_end',
+		TIMER_UPDATE: 'timer_update',
 	},
 };
