@@ -94,6 +94,9 @@ class Room {
 		 */
 		this.remainingRoundTime = 0;
 
+		
+		this.remainingTimeInterval = null;
+
 		// Add room to list of rooms
 		Room.rooms.push(this);
 	}
@@ -227,27 +230,10 @@ class Room {
 				return socket;
 			});
 
-			this.remainingRoundTime = roundDuration / 1000;
-
-			const remainingTimeInterval = setInterval(() => {
-				this.remainingRoundTime -= 1;
-				if (this.remainingRoundTime <= 0) {
-					clearInterval(remainingTimeInterval);
-				}
-				Room.io.in(this.name).emit(serverResponse.TIMER_UPDATE, this.remainingRoundTime);
-			}, 1000);
-
-			// Send a scoreboard update
-			Room.io.in(this.name).emit(serverResponse.SCOREBOARD_UPDATE, { scoreboard: this.getScoreboard() });
-
-			// Listen for players answers
-			this.playersSockets.forEach((socket) => {
-				socket.answerListener = this.getSocketAnswerListenerFunction(socket);
-				socket.on(clientEvent.SAUCE_ANSWER, socket.answerListener);
-			});
-
-			// Wait for round duration before doing anything
-			this.roundTimeout = setTimeout(() => {
+			/**
+			 * Function responsible for the actions at the end of a round
+			 */
+			const processRoundEnd = () => {
 				console.info(`[GAME] [Room "${this.name}"] Round ended`);
 
 				// Stop listening to player answers
@@ -279,7 +265,36 @@ class Room {
 
 					console.info(`[GAME] [Room "${this.name}"] Game ended`);
 				}
-			}, roundDuration);  // TODO: find a way to shorten duration during round
+			};
+
+			this.remainingRoundTime = roundDuration / 1000;
+			const numberOfPlayers = this.playersSockets.length;
+			this.remainingTimeInterval = setInterval(() => {
+				this.remainingRoundTime -= 1;
+				if (this.remainingRoundTime <= 0) {
+					clearInterval(this.remainingTimeInterval);
+				}
+				Room.io.in(this.name).emit(serverResponse.TIMER_UPDATE, this.remainingRoundTime);
+
+				const numberOfPlayersWhoGuessed = this.playersSockets.filter(({ found }) => found).length;
+				if (numberOfPlayersWhoGuessed === numberOfPlayers) {
+					clearInterval(this.remainingTimeInterval);
+					clearTimeout(this.roundTimeout);
+					processRoundEnd();
+				}
+			}, 1000);
+
+			// Send a scoreboard update
+			Room.io.in(this.name).emit(serverResponse.SCOREBOARD_UPDATE, { scoreboard: this.getScoreboard() });
+
+			// Listen for players answers
+			this.playersSockets.forEach((socket) => {
+				socket.answerListener = this.getSocketAnswerListenerFunction(socket);
+				socket.on(clientEvent.SAUCE_ANSWER, socket.answerListener);
+			});
+
+			// Wait for round duration before doing anything
+			this.roundTimeout = setTimeout(processRoundEnd, roundDuration);
 		};
 
 		this.started = true;
