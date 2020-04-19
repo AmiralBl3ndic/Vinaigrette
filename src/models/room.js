@@ -2,7 +2,6 @@
 
 const { formatAnswer } = require('../utils');
 const MongoDBService = require('../services/mongodb-service');
-const ImageSauce = require('./image-sauce');
 
 const { requests: clientEvent, responses: serverResponse } = require('../socket-event-names');
 
@@ -78,6 +77,12 @@ class Room {
 		 */
 		this.started = false;
 
+		/**
+		 * 
+		 * @type {Function}
+		 */
+		this.roundTimeout = null;
+
 		// Add room to list of rooms
 		Room.rooms.push(this);
 	}
@@ -116,7 +121,7 @@ class Room {
 		}
 
 		// Determine type of sauce and send it to players
-		if (sauce instanceof ImageSauce) {
+		if (sauce.imageUrl) {
 			Room.io.in(this.name).emit(serverResponse.NEW_ROUND_SAUCE, {
 				type: 'image',
 				imageUrl: sauce.imageUrl,
@@ -165,7 +170,7 @@ class Room {
 	 */
 	async start () {
 		const pointsToWin = 100;
-		const roundDuration = 25 * 1000;  // 25 seconds
+		const roundDuration = 10 * 1000;  // 25 seconds
 		const timeBetweenRounds = 4 * 1000;  // 4 seconds
 		
 		if (this.started) {
@@ -210,7 +215,7 @@ class Room {
 			});
 
 			// Wait for round duration before doing anything
-			setTimeout(() => {
+			this.roundTimeout = setTimeout(() => {
 				console.info(`[GAME] [Room "${this.name}"] Round ended`);
 
 				// Stop listening to player answers
