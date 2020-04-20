@@ -360,6 +360,20 @@ Its parameter contaains the following:
 }
 ```
 
+### `chat` **WIP, not available yet**
+
+The server sends this event to all users in a room when a user of this room sent a 
+message in the chat.
+
+Its data is formatted as follow:
+
+```javascript
+{
+    "username": "johndoe",  // Username of the user who sent the message
+    "message": "Hello, world!"  // Content of the message sent by the user
+}
+```
+
 
 ## Troubleshooting
 
