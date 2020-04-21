@@ -168,6 +168,8 @@ class Room {
 	 * @param {String} rightAnswer Awaited answer
 	 */
 	processPlayerAnswer (socket, answer, rightAnswer) {
+		if (socket.found) return;  // Do not process the answer of a player who have already found the answer
+
 		if (formatAnswer(answer) === rightAnswer) {
 			// Increase player score
 			socket.points += this.roundPoints;
