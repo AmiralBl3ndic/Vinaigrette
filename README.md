@@ -264,6 +264,23 @@ Send a chat message in the game room you are playing.
 
 This action takes only a string as parameter, it must contain the content of the message.
 
+### `report_sauce`
+
+Report the sauce currently being displayed as being wrong or inacceptable.
+
+#### Parameters
+
+This action takes an object parameter with the following fields:
+
+- `type` *(String)* (Either "quote" or "image"): Type of the sauce being reported
+- `id` *(String)*: ID of the sauce being reported (it is sent by the server with the `new_round_sauce` event)
+
+#### Responses
+
+The server will respond with the `report_received` event when it has received and processed the report.
+
+This event does not carry any additional data.
+
 
 ## Handling server events
 
@@ -306,7 +323,8 @@ The server sends this event at each round start. Its parameter contains the sauc
 ```javascript
 {
     "type": "quote",
-    "quote": "Lorem ipsum dolor sit amet"  // Content of the quote
+    "quote": "Lorem ipsum dolor sit amet",  // Content of the quote
+    "id": "zretsrvsfv342Adfgt"  // ID of the quote
 }
 ```
 
@@ -315,7 +333,8 @@ The server sends this event at each round start. Its parameter contains the sauc
 ```javascript
 {
     "type": "image",
-    "imageUrl": "https://link-to-the-image.jpg"  // Link to the image
+    "imageUrl": "https://link-to-the-image.jpg",  // Link to the image
+    "id": "zretsrvsfv342Adfgt"  // ID of the image
 }
 ```
 
