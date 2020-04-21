@@ -214,6 +214,8 @@ function handleStartGame (socket, roomName) {
  * @param {String} message Message being sent
  */
 function handleChatMessage (socket, message) {
+	console.info(`[SOCKET] [Socket ${socket.id}] User "${socket.username}" sent message "${message}"`);
+
 	// Perform only if user has a valid username and is in a room
 	if (socket.username && socket.currentRoom) {
 		Room.io.in(socket.currentRoom).emit(socketEvents.responses.CHAT, {
