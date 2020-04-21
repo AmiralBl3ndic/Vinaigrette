@@ -7,6 +7,7 @@ module.exports = {
 		START_GAME: 'start_game',
 		SAUCE_ANSWER: 'sauce_answer',
 		CHAT: 'chat',
+		REPORT: 'report_sauce',
 	},
 	responses: {
 		ROOMS_LIST_UPDATE: 'rooms_list_update',
@@ -30,5 +31,6 @@ module.exports = {
 		GAME_END: 'game_end',
 		TIMER_UPDATE: 'timer_update',
 		CHAT: 'chat',
+		REPORT_RECEIVED: 'report_received',
 	},
 };
