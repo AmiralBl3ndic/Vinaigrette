@@ -2,6 +2,8 @@
 
 const socketEvents = require('./socket-event-names');
 
+let registeredUsernames = [];
+
 const Room = require('./models/room');
 
 /**
@@ -69,11 +71,15 @@ function handleLeaveRoom (socket, roomName) {
  * @param {SocketIO.Socket} socket Socket concerned by the operation
  */
 function handleDisconnect (socket) {
-	console.info(`[SOCKET] [Socket ${socket.id}] Client disconnected`);
-
 	if (socket.currentRoom) {
 		handleLeaveRoom(socket, socket.currentRoom);
 	}
+
+	if (socket.username) {
+		registeredUsernames = registeredUsernames.filter((username) => username !== socket.username);
+	}
+
+	console.info(`[SOCKET] [Socket ${socket.id}] Client disconnected`);
 }
 
 /**
@@ -84,7 +90,15 @@ function handleDisconnect (socket) {
 function handleSetUsername (socket, username) {
 	console.info(`[SOCKET] [Socket ${socket.id}] set_username ("${username}")`);
 
-	socket.username = username;
+	const trimmedUsername = username.trim();
+
+	if (!registeredUsernames.includes(trimmedUsername)) {
+		socket.username = trimmedUsername;
+		registeredUsernames.push(trimmedUsername);
+		socket.emit(socketEvents.responses.USERNAME_SET, trimmedUsername);
+	} else {
+		socket.emit(socketEvents.responses.USERNAME_NOT_AVAILABLE, trimmedUsername);
+	}
 }
 
 /**

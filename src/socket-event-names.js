@@ -32,5 +32,7 @@ module.exports = {
 		TIMER_UPDATE: 'timer_update',
 		CHAT: 'chat',
 		REPORT_RECEIVED: 'report_received',
+		USERNAME_SET: 'username_set',
+		USERNAME_NOT_AVAILABLE: 'username_not_available',
 	},
 };
