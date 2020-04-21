@@ -1,10 +1,29 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-param-reassign */
+
+const ImageSauce = require('./image-sauce');
+const QuoteSauce = require('./quote-sauce');
+
+const { maximumReportsBeforeSauceBan } = require('../server.config');
 
 const { formatAnswer } = require('../utils');
 const MongoDBService = require('../services/mongodb-service');
 
 const { requests: clientEvent, responses: serverResponse } = require('../socket-event-names');
 
+/**
+ * @typedef CurrentSauce
+ * @property {mongoose.Types.ObjectID} _id
+ * @property {String} answer
+ * @property {String} imageUrl
+ * @property {String} quote
+ * @property {String} answer
+ * @property {String} originalAnswer
+ */
+
+/**
+ * Represents a game room
+ */
 class Room {
 	/**
 	 * SocketIO Server
@@ -84,7 +103,7 @@ class Room {
 
 		/**
 		 * Current sauce to send to the players
-		 * @type {Object}
+		 * @type {CurrentSauce}
 		 */
 		this.currentSauce = null;
 
@@ -238,8 +257,11 @@ class Room {
 			const processRoundEnd = () => {
 				console.info(`[GAME] [Room "${this.name}"] Round ended`);
 
-				// Stop listening to player answers
-				this.playersSockets.forEach((socket) => socket.off(clientEvent.SAUCE_ANSWER, socket.answerListener));
+				// Stop listening to player answers and mark all as able to report again
+				this.playersSockets.forEach((socket) => {
+					socket.off(clientEvent.SAUCE_ANSWER, socket.answerListener);
+					socket.currentSauceReported = false;
+				});
 
 				// Notify players of round end
 				Room.io.in(this.name).emit(serverResponse.ROUND_END);
@@ -302,6 +324,40 @@ class Room {
 		this.started = true;
 		console.info(`[GAME] [Room "${this.name}"] Game started`);
 		startGameRound();  // Start the first game round
+	}
+
+	/**
+	 * Handles updating records reports and deleting the ones with too many reports
+	 */
+	async reportCurrentSauce () {
+		const reportedSauce = this.currentSauce;
+
+		// Check if current sauce is an image
+		if (this.currentSauce.imageUrl) {
+			const sauces = await ImageSauce.find({ imageUrl: reportedSauce.imageUrl });
+			
+			for (const sauce of sauces) {
+				sauce.reports = sauce.reports ? sauce.reports + 1 : 1;
+
+				if (sauce.reports >= maximumReportsBeforeSauceBan) {
+					sauce.remove();
+				} else {
+					sauce.save();
+				}
+			}
+		} else {
+			const sauces = await QuoteSauce.find({ quote: reportedSauce.quote, originalAnswer: reportedSauce.originalAnswer });
+
+			for (const sauce of sauces) {
+				sauce.reports = sauce.reports ? sauce.reports + 1 : 1;
+
+				if (sauce.reports >= maximumReportsBeforeSauceBan) {
+					sauce.remove();
+				} else {
+					sauce.save();
+				}
+			}
+		}
 	}
 }
 
