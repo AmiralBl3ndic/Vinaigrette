@@ -149,6 +149,15 @@ You must provide a username in the `username` field of the parameter (object).
 
 **IMPORTANT:** For many events, it is required that you set a username.
 
+#### Responses
+
+The server will respond with the following events :
+
+- `username_set`: Means that your username has been set. This event carries the set username 
+as a string parameter.
+- `username_not_available`: Means that your username has not been set because it is not available. 
+This event carries the unavailable username as a string parameter.
+
 ### `create_room`
 
 Create a game room. Will produce an error if the room already exists.
