@@ -297,15 +297,17 @@ class Room {
 			this.remainingTimeInterval = setInterval(() => {
 				this.remainingRoundTime -= 1;
 				if (this.remainingRoundTime <= 0) {
+					console.info(`[ROOM] [Room "${this.name}"]`);
 					clearInterval(this.remainingTimeInterval);
-				}
-				Room.io.in(this.name).emit(serverResponse.TIMER_UPDATE, this.remainingRoundTime);
-
-				const numberOfPlayersWhoGuessed = this.playersSockets.filter(({ found }) => found).length;
-				if (numberOfPlayersWhoGuessed === numberOfPlayers) {
-					clearInterval(this.remainingTimeInterval);
-					clearTimeout(this.roundTimeout);
-					processRoundEnd();
+					Room.io.in(this.name).emit(serverResponse.TIMER_UPDATE, 0);
+				} else {
+					Room.io.in(this.name).emit(serverResponse.TIMER_UPDATE, this.remainingRoundTime);
+					const numberOfPlayersWhoGuessed = this.playersSockets.filter(({ found }) => found).length;
+					if (numberOfPlayersWhoGuessed === numberOfPlayers) {
+						clearInterval(this.remainingTimeInterval);
+						clearTimeout(this.roundTimeout);
+						processRoundEnd();
+					}
 				}
 			}, 1000);
 
