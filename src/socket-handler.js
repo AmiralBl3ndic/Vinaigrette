@@ -250,6 +250,8 @@ function handleChatMessage (socket, message) {
  */
 function handleReport (socket) {
 	if (socket.username && socket.currentRoom && !socket.currentSauceReported) {
+		console.info(`[SOCKET] [Socket ${socket.id}] Report received`);
+
 		const room = Room.findRoom(socket.currentRoom);
 		room.reportCurrentSauce();  // Start async call to report function
 		socket.currentSauceReported = true;
