@@ -5,6 +5,7 @@ const quoteSauceSchema = mongoose.Schema({
 	quote: String,
 	answer: String,
 	originalAnswer: String,
+	reports: Number,
 });
 
 module.exports = mongoose.model('QuoteSauce', quoteSauceSchema, 'quote_sauces');

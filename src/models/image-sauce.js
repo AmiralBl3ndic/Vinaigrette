@@ -5,6 +5,7 @@ const imageSauceSchema = mongoose.Schema({
 	imageUrl: String,
 	answer: String,
 	originalAnswer: String,
+	reports: Number,
 });
 
 module.exports = mongoose.model('ImageSauce', imageSauceSchema, 'image_sauces');
