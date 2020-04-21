@@ -249,12 +249,10 @@ function handleChatMessage (socket, message) {
  * @param {SocketIO.Socket} socket Socket of the user reporting the sauce
  */
 function handleReport (socket) {
-	// TODO: Get current room of player
-	// TODO: dispatch report event in that room
-	// TODO: mark socket as having reported that sauce
-
-	if (socket.username && socket.currentRoom) {
-		// const room = Room.findRoom(socket.currentRoom);
+	if (socket.username && socket.currentRoom && !socket.currentSauceReported) {
+		const room = Room.findRoom(socket.currentRoom);
+		room.reportCurrentSauce();  // Start async call to report function
+		socket.currentSauceReported = true;
 		socket.emit(socketEvents.responses.REPORT_RECEIVED);
 	}
 }
