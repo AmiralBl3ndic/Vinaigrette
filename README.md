@@ -256,6 +256,14 @@ The server will respond with events:
 - `wrong_answer`: If the answer is incorrect
 - `good_answer`: If the answer is correct
 
+### `chat`
+
+Send a chat message in the game room you are playing.
+
+#### Parameters
+
+This action takes only a string as parameter, it must contain the content of the message.
+
 
 ## Handling server events
 
