@@ -331,6 +331,8 @@ class Room {
 	 * Handles updating records reports and deleting the ones with too many reports
 	 */
 	async reportCurrentSauce () {
+		console.info(`[ROOM] [Room "${this.name}"] [REPORT] Sauce reported`);
+
 		const reportedSauce = this.currentSauce;
 
 		// Check if current sauce is an image
@@ -343,6 +345,7 @@ class Room {
 				if (sauce.reports >= maximumReportsBeforeSauceBan) {
 					S3Service.deleteImage(sauce.imageUrl);
 					sauce.remove();
+					console.info(`[ROOM] [Room "${this.name}"] [REPORT] Sauce was deleted`);
 				} else {
 					sauce.save();
 				}
@@ -355,6 +358,7 @@ class Room {
 
 				if (sauce.reports >= maximumReportsBeforeSauceBan) {
 					sauce.remove();
+					console.info(`[ROOM] [Room "${this.name}"] [REPORT] Sauce was deleted`);
 				} else {
 					sauce.save();
 				}
