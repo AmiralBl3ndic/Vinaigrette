@@ -245,6 +245,21 @@ function handleChatMessage (socket, message) {
 }
 
 /**
+ * Handles a report signal sent by a user about a sauce
+ * @param {SocketIO.Socket} socket Socket of the user reporting the sauce
+ */
+function handleReport (socket) {
+	// TODO: Get current room of player
+	// TODO: dispatch report event in that room
+	// TODO: mark socket as having reported that sauce
+
+	if (socket.username && socket.currentRoom) {
+		// const room = Room.findRoom(socket.currentRoom);
+		socket.emit(socketEvents.responses.REPORT_RECEIVED);
+	}
+}
+
+/**
  * Init a socket with custom parameters and bind events to it.
  * @param {SocketIO.Socket} socket Socket to init
  */
@@ -261,6 +276,7 @@ function initSocket (socket) {
 	socket.on(socketEvents.requests.LEAVE_ROOM, ({ roomName }) => handleLeaveRoom(socket, roomName));
 	socket.on(socketEvents.requests.START_GAME, ({ roomName }) => handleStartGame(socket, roomName));
 	socket.on(socketEvents.requests.CHAT, (message) => handleChatMessage(socket, message));
+	socket.on(socketEvents.requests.REPORT, () => handleReport(socket));
 }
 
 module.exports = {
