@@ -279,10 +279,7 @@ Report the sauce currently being displayed as being wrong or inacceptable.
 
 #### Parameters
 
-This action takes an object parameter with the following fields:
-
-- `type` *(String)* (Either "quote" or "image"): Type of the sauce being reported
-- `id` *(String)*: ID of the sauce being reported (it is sent by the server with the `new_round_sauce` event)
+This action does not take any parameter.
 
 #### Responses
 
