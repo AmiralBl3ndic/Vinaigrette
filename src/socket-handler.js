@@ -90,6 +90,11 @@ function handleDisconnect (socket) {
 function handleSetUsername (socket, username) {
 	console.info(`[SOCKET] [Socket ${socket.id}] set_username ("${username}")`);
 
+	if (!username) {
+		socket.emit(socketEvents.responses.USERNAME_NOT_AVAILABLE, null);
+		return;
+	}
+
 	const trimmedUsername = username.trim();
 
 	if (!registeredUsernames.includes(trimmedUsername)) {
