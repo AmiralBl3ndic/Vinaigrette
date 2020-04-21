@@ -44,6 +44,7 @@ function handleLeaveRoom (socket, roomName) {
 
 	// Actually leave room
 	socket.leave(roomName);
+	socket.currentRoom = '';
 	room.playersSockets = room.playersSockets.filter(({ id }) => id !== socket.id);
 
 	const scoreboard = room.getScoreboard();
@@ -208,6 +209,21 @@ function handleStartGame (socket, roomName) {
 }
 
 /**
+ * Handles a chat message sent by a client in the game room he's playing in.
+ * @param {SocketIO.Socket} socket Socket of the client sending the message
+ * @param {String} message Message being sent
+ */
+function handleChatMessage (socket, message) {
+	// Perform only if user has a valid username and is in a room
+	if (socket.username && socket.currentRoom) {
+		Room.io.in(socket.currentRoom).emit(socketEvents.responses.CHAT, {
+			message,
+			username: socket.username,
+		});
+	}
+}
+
+/**
  * Init a socket with custom parameters and bind events to it.
  * @param {SocketIO.Socket} socket Socket to init
  */
@@ -223,6 +239,7 @@ function initSocket (socket) {
 	socket.on(socketEvents.requests.JOIN_ROOM, ({ roomName }) => handleJoinRoom(socket, roomName));
 	socket.on(socketEvents.requests.LEAVE_ROOM, ({ roomName }) => handleLeaveRoom(socket, roomName));
 	socket.on(socketEvents.requests.START_GAME, ({ roomName }) => handleStartGame(socket, roomName));
+	socket.on(socketEvents.requests.CHAT, (message) => handleChatMessage(socket, message));
 }
 
 module.exports = {
