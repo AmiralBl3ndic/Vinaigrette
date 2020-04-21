@@ -117,6 +117,8 @@ class Room {
 		
 		this.remainingTimeInterval = null;
 
+		this.sauceDeleted = false;
+
 		// Add room to list of rooms
 		Room.rooms.push(this);
 	}
@@ -246,6 +248,8 @@ class Room {
 				return;  // No need to continue if no sauce available
 			}
 
+			this.sauceDeleted = false;
+
 			// Ensure all players have their "found status" set to false (not found)
 			this.playersSockets = this.playersSockets.map((socket) => {
 				socket.found = false;
@@ -297,7 +301,6 @@ class Room {
 			this.remainingTimeInterval = setInterval(() => {
 				this.remainingRoundTime -= 1;
 				if (this.remainingRoundTime <= 0) {
-					console.info(`[ROOM] [Room "${this.name}"]`);
 					clearInterval(this.remainingTimeInterval);
 					Room.io.in(this.name).emit(serverResponse.TIMER_UPDATE, 0);
 				} else {
@@ -337,6 +340,8 @@ class Room {
 
 		const reportedSauce = this.currentSauce;
 
+		if (this.sauceDeleted) return;
+
 		// Check if current sauce is an image
 		if (this.currentSauce.imageUrl) {
 			const sauces = await ImageSauce.find({ imageUrl: reportedSauce.imageUrl });
@@ -347,8 +352,9 @@ class Room {
 				if (sauce.reports >= maximumReportsBeforeSauceBan) {
 					S3Service.deleteImage(sauce.imageUrl);
 					sauce.remove();
+					this.sauceDeleted = true;
 					console.info(`[ROOM] [Room "${this.name}"] [REPORT] Sauce was deleted`);
-				} else {
+				} else if (!this.sauceDeleted) {
 					sauce.save();
 				}
 			}
@@ -360,8 +366,9 @@ class Room {
 
 				if (sauce.reports >= maximumReportsBeforeSauceBan) {
 					sauce.remove();
+					this.sauceDeleted = true;
 					console.info(`[ROOM] [Room "${this.name}"] [REPORT] Sauce was deleted`);
-				} else {
+				} else if (!this.sauceDeleted) {
 					sauce.save();
 				}
 			}
