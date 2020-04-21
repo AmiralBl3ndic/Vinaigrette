@@ -17,10 +17,17 @@ const maximumAPIPostRequestsByHourAndByIp = 60;  // Default = 60/hour (1/min)
  */
 const maximumAPIRandomGetRequestsByHourAndByIp = 3600;  // Default = 3600/hour (1/s)
 
+/**
+ * Maximum allowed reports before a sauce is getting banned
+ */
+const maximumReportsBeforeSauceBan = 20;
+
 module.exports = {
 	mongoConnectionString: process.env.CONTAINERIZED === 'true' ? 'mongodb://mongo:27017/' : 'mongodb://localhost:27017/',
 
 	maximumImageSizeAllowed,
+
+	maximumReportsBeforeSauceBan,
 
 	postRateLimiter: rateLimit({
 		windowMs: 1000 * 60 * 60,  // 1 hour time window
