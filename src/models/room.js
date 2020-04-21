@@ -8,6 +8,7 @@ const { maximumReportsBeforeSauceBan } = require('../server.config');
 
 const { formatAnswer } = require('../utils');
 const MongoDBService = require('../services/mongodb-service');
+const S3Service = require('../services/s3-service');
 
 const { requests: clientEvent, responses: serverResponse } = require('../socket-event-names');
 
@@ -340,6 +341,7 @@ class Room {
 				sauce.reports = sauce.reports ? sauce.reports + 1 : 1;
 
 				if (sauce.reports >= maximumReportsBeforeSauceBan) {
+					S3Service.deleteImage(sauce.imageUrl);
 					sauce.remove();
 				} else {
 					sauce.save();
