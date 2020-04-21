@@ -18,104 +18,6 @@ function sendRoomsList (socket) {
 	}
 }
 
-/**
- * Handle a client disconnection
- * @param {SocketIO.Socket} socket Socket concerned by the operation
- */
-function handleDisconnect (socket) {
-	console.info(`[SOCKET] [Socket ${socket.id}] Client disconnected`);
-}
-
-/**
- * Sets the username for a given socket
- * @param {SocketIO.Socket} socket Socket to perform the actions on
- * @param {String} username Name to set
- */
-function handleSetUsername (socket, username) {
-	console.info(`[SOCKET] [Socket ${socket.id}] set_username ("${username}")`);
-
-	socket.username = username;
-}
-
-/**
- * Handles creation of a room by a client
- * 
- * This will attempt to create a room and join it if succeeds
- * @param {SocketIO.Socket} socket Socket to perform the operation with
- * @param {String} roomName Name of the room to create
- */
-function handleCreateRoom (socket, roomName) {
-	console.info(`[SOCKET] [Socket ${socket.id}] create_room ("${roomName}")`);
-
-	// Check that user has set its username
-	if (!socket.username) {
-		socket.emit(socketEvents.responses.CREATE_ROOM_ERROR, { roomName, error: 'You must have a username to create a room' });
-		return;
-	}
-
-	if (!Room.isNameAvailable(roomName)) {
-		socket.emit(socketEvents.responses.CREATE_ROOM_ERROR, { roomName, error: 'Room already exists' });
-		return;
-	}
-
-	const room = new Room(roomName);
-	socket.join(room.name);
-	socket.points = 0;  // Initialize player score to 0
-	socket.found = false;  // Initialize player found status to false (not found)
-	room.playersSockets.push(socket);
-
-	const scoreboard = room.getScoreboard();
-
-	socket.emit(socketEvents.responses.CREATE_ROOM_SUCCESS, { roomName, started: room.started });
-	socket.emit(socketEvents.responses.SCOREBOARD_UPDATE, { scoreboard });
-
-	sendRoomsList();
-}
-
-/**
- * Handles join of a room by a client
- * @param {SocketIO.Socket} socket Socket to perform the operation with
- * @param {String} roomName Name of the room to join
- */
-function handleJoinRoom (socket, roomName) {
-	console.info(`[SOCKET] [Socket ${socket.id}] join_room ("${roomName}")`);
-
-	// Check that user has set its username
-	if (!socket.username) {
-		socket.emit(socketEvents.responses.JOIN_ROOM_ERROR, { roomName, error: 'You must have a username to join a room' });
-		return;
-	}
-
-	const room = Room.findRoom(roomName);
-
-	if (!room) {
-		socket.emit(socketEvents.responses.JOIN_ROOM_ERROR, { roomName, error: 'Room not found' });
-		return;
-	}
-
-	socket.join(room.name);
-	socket.points = 0;  // Initialize player score to 0
-	socket.found = false;  // Initialize player found status to false (not found)
-	if (room.started) {
-		// Bind an answer listener to the user's socket
-		socket.answerListener = room.getSocketAnswerListenerFunction(socket);
-		socket.on(socketEvents.requests.SAUCE_ANSWER, socket.answerListener);
-	}
-	room.playersSockets.push(socket);
-
-	const scoreboard = room.getScoreboard();
-
-	socket.emit(socketEvents.responses.JOIN_ROOM_SUCCESS, { roomName, started: room.started });
-	Room.io.in(room.name).emit(socketEvents.responses.SCOREBOARD_UPDATE, { scoreboard });
-
-	if (room.started) {
-		const { currentSauce } = room;
-		const type = currentSauce.quote ? 'quote' : 'image';
-		
-		socket.emit(socketEvents.responses.NEW_ROUND_SAUCE, { type, ...currentSauce });
-		socket.emit(socketEvents.responses.TIMER_UPDATE, room.remainingRoundTime);
-	}
-}
 
 /**
  * Handles leaving a room by a client
@@ -158,6 +60,111 @@ function handleLeaveRoom (socket, roomName) {
 
 		Room.rooms = Room.rooms.filter(({ name }) => name !== roomName);
 		sendRoomsList();
+	}
+}
+
+/**
+ * Handle a client disconnection
+ * @param {SocketIO.Socket} socket Socket concerned by the operation
+ */
+function handleDisconnect (socket) {
+	console.info(`[SOCKET] [Socket ${socket.id}] Client disconnected`);
+
+	if (socket.currentRoom) {
+		handleLeaveRoom(socket, socket.currentRoom);
+	}
+}
+
+/**
+ * Sets the username for a given socket
+ * @param {SocketIO.Socket} socket Socket to perform the actions on
+ * @param {String} username Name to set
+ */
+function handleSetUsername (socket, username) {
+	console.info(`[SOCKET] [Socket ${socket.id}] set_username ("${username}")`);
+
+	socket.username = username;
+}
+
+/**
+ * Handles creation of a room by a client
+ * 
+ * This will attempt to create a room and join it if succeeds
+ * @param {SocketIO.Socket} socket Socket to perform the operation with
+ * @param {String} roomName Name of the room to create
+ */
+function handleCreateRoom (socket, roomName) {
+	console.info(`[SOCKET] [Socket ${socket.id}] create_room ("${roomName}")`);
+
+	// Check that user has set its username
+	if (!socket.username) {
+		socket.emit(socketEvents.responses.CREATE_ROOM_ERROR, { roomName, error: 'You must have a username to create a room' });
+		return;
+	}
+
+	if (!Room.isNameAvailable(roomName)) {
+		socket.emit(socketEvents.responses.CREATE_ROOM_ERROR, { roomName, error: 'Room already exists' });
+		return;
+	}
+
+	const room = new Room(roomName);
+	socket.join(room.name);
+	socket.currentRoom = room.name;
+	socket.points = 0;  // Initialize player score to 0
+	socket.found = false;  // Initialize player found status to false (not found)
+	room.playersSockets.push(socket);
+
+	const scoreboard = room.getScoreboard();
+
+	socket.emit(socketEvents.responses.CREATE_ROOM_SUCCESS, { roomName, started: room.started });
+	socket.emit(socketEvents.responses.SCOREBOARD_UPDATE, { scoreboard });
+
+	sendRoomsList();
+}
+
+/**
+ * Handles join of a room by a client
+ * @param {SocketIO.Socket} socket Socket to perform the operation with
+ * @param {String} roomName Name of the room to join
+ */
+function handleJoinRoom (socket, roomName) {
+	console.info(`[SOCKET] [Socket ${socket.id}] join_room ("${roomName}")`);
+
+	// Check that user has set its username
+	if (!socket.username) {
+		socket.emit(socketEvents.responses.JOIN_ROOM_ERROR, { roomName, error: 'You must have a username to join a room' });
+		return;
+	}
+
+	const room = Room.findRoom(roomName);
+
+	if (!room) {
+		socket.emit(socketEvents.responses.JOIN_ROOM_ERROR, { roomName, error: 'Room not found' });
+		return;
+	}
+
+	socket.join(room.name);
+	socket.currentRoom = room.name;
+	socket.points = 0;  // Initialize player score to 0
+	socket.found = false;  // Initialize player found status to false (not found)
+	if (room.started) {
+		// Bind an answer listener to the user's socket
+		socket.answerListener = room.getSocketAnswerListenerFunction(socket);
+		socket.on(socketEvents.requests.SAUCE_ANSWER, socket.answerListener);
+	}
+	room.playersSockets.push(socket);
+
+	const scoreboard = room.getScoreboard();
+
+	socket.emit(socketEvents.responses.JOIN_ROOM_SUCCESS, { roomName, started: room.started });
+	Room.io.in(room.name).emit(socketEvents.responses.SCOREBOARD_UPDATE, { scoreboard });
+
+	if (room.started) {
+		const { currentSauce } = room;
+		const type = currentSauce.quote ? 'quote' : 'image';
+		
+		socket.emit(socketEvents.responses.NEW_ROUND_SAUCE, { type, ...currentSauce });
+		socket.emit(socketEvents.responses.TIMER_UPDATE, room.remainingRoundTime);
 	}
 }
 
