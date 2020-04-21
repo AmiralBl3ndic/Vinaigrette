@@ -6,6 +6,7 @@ module.exports = {
 		SET_USERNAME: 'set_username',
 		START_GAME: 'start_game',
 		SAUCE_ANSWER: 'sauce_answer',
+		CHAT: 'chat',
 	},
 	responses: {
 		ROOMS_LIST_UPDATE: 'rooms_list_update',
@@ -28,5 +29,6 @@ module.exports = {
 		GAME_START: 'game_start',
 		GAME_END: 'game_end',
 		TIMER_UPDATE: 'timer_update',
+		CHAT: 'chat',
 	},
 };
