@@ -223,7 +223,7 @@ class Room {
 	 * Start a game in the room
 	 */
 	async start () {
-		const pointsToWin = 100;
+		const pointsToWin = 8;
 		const roundDuration = 25 * 1000;  // 25 seconds
 		const timeBetweenRounds = 4 * 1000;  // 4 seconds
 		
@@ -289,6 +289,11 @@ class Room {
 						startGameRound();
 					}, timeBetweenRounds);
 				} else {  // If a player has won
+					// Send good answer to all players
+					Room.io.in(this.name).emit(serverResponse.RIGHT_ANSWER, {
+						answer: sauce.originalAnswer,
+					});
+
 					// Determine winner (highest score)
 					const winningPlayers = this.playersSockets
 						.map((player) => ({ username: player.username, score: player.points, foundAt: player.foundAt }))  // Get only relevant data
@@ -302,10 +307,15 @@ class Room {
 						winner = winningPlayers.sort((p1, p2) => p1.foundAt - p2.foundAt)[0];
 					}
 
-					// Notify all players of winner
-					Room.io.in(this.name).emit(serverResponse.PLAYER_WON, winner);
+					setTimeout(() => {
+						// Notify all players of winner and game end
+						Room.io.in(this.name).emit(serverResponse.PLAYER_WON, winner);
+						Room.io.in(this.name).emit(serverResponse.GAME_END);
 
-					console.info(`[GAME] [Room "${this.name}"] Game ended`);
+						this.started = false;
+
+						console.info(`[GAME] [Room "${this.name}"] Game ended`);
+					}, timeBetweenRounds);
 				}
 			};
 
