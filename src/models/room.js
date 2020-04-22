@@ -223,7 +223,7 @@ class Room {
 	 * Start a game in the room
 	 */
 	async start () {
-		const pointsToWin = 100;
+		const pointsToWin = 8;
 		const roundDuration = 25 * 1000;  // 25 seconds
 		const timeBetweenRounds = 4 * 1000;  // 4 seconds
 		
@@ -304,6 +304,7 @@ class Room {
 
 					// Notify all players of winner
 					Room.io.in(this.name).emit(serverResponse.PLAYER_WON, winner);
+					Room.io.in(this.name).emit(serverResponse.GAME_END);
 
 					console.info(`[GAME] [Room "${this.name}"] Game ended`);
 				}
