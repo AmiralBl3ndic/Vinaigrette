@@ -37,6 +37,15 @@ const gameRoundDurationSeconds = 25;
  */
 const gameRoundTimeoutDurationSeconds = 4;
 
+/**
+ * List of forbidden usernames
+ */
+const restrictedUsernames = [
+	'me',
+	'system',
+	'root',
+	'hitler',  // Because obvious
+];
 
 module.exports = {
 	mongoConnectionString: process.env.CONTAINERIZED === 'true' ? 'mongodb://mongo:27017/' : 'mongodb://localhost:27017/',
@@ -62,4 +71,6 @@ module.exports = {
 	gameRoundDurationSeconds,
 
 	gameRoundTimeoutDurationSeconds,
+
+	restrictedUsernames,
 };
