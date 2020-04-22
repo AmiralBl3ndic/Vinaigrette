@@ -22,6 +22,22 @@ const maximumAPIRandomGetRequestsByHourAndByIp = 3600;  // Default = 3600/hour (
  */
 const maximumReportsBeforeSauceBan = 20;
 
+/**
+ * Default score goal for a room
+ */
+const defaultWinningScore = 100;
+
+/**
+ * Number of seconds a game round should last
+ */
+const gameRoundDurationSeconds = 25;
+
+/**
+ * Number of seconds to wait between two rounds
+ */
+const gameRoundTimeoutDurationSeconds = 4;
+
+
 module.exports = {
 	mongoConnectionString: process.env.CONTAINERIZED === 'true' ? 'mongodb://mongo:27017/' : 'mongodb://localhost:27017/',
 
@@ -40,4 +56,10 @@ module.exports = {
 		max: maximumAPIRandomGetRequestsByHourAndByIp,
 		message: `You have exceeded the maximum number of requests (${maximumAPIRandomGetRequestsByHourAndByIp}) in an hour`,
 	}),
+
+	defaultWinningScore,
+
+	gameRoundDurationSeconds,
+
+	gameRoundTimeoutDurationSeconds,
 };
