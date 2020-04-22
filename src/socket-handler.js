@@ -2,6 +2,8 @@
 
 const socketEvents = require('./socket-event-names');
 
+const { restrictedUsernames } = require('./server.config');
+
 let registeredUsernames = [];
 
 const Room = require('./models/room');
@@ -96,6 +98,12 @@ function handleSetUsername (socket, username) {
 	}
 
 	const trimmedUsername = username.trim();
+
+	// Filter forbidden usernames
+	if (restrictedUsernames.includes(trimmedUsername.toLowerCase())) {
+		socket.emit(socketEvents.responses.FORBIDDEN_USERNAME, trimmedUsername);
+		return;
+	}
 
 	if (!registeredUsernames.includes(trimmedUsername)) {
 		socket.username = trimmedUsername;

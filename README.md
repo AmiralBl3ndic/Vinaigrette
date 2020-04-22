@@ -143,6 +143,13 @@ The available custom actions that the server will understand are the following:
 
 Set your username for the session.
 
+The server includes a set of restricted usernames, by default they are the following:
+
+- `me`
+- `system`
+- `root`
+- `hitler`
+
 #### Parameters
 
 You must provide a username in the `username` field of the parameter (object).
@@ -151,12 +158,14 @@ You must provide a username in the `username` field of the parameter (object).
 
 #### Responses
 
-The server will respond with the following events :
+The server will respond with the following events:
 
 - `username_set`: Means that your username has been set. This event carries the set username 
 as a string parameter.
 - `username_not_available`: Means that your username has not been set because it is not available. 
 This event carries the unavailable username as a string parameter.
+- `forbidden_username`: Means that the username you have chosen is forbidden and cannot be used. 
+This event carries the forbidden username as a string parameter.
 
 ### `create_room`
 

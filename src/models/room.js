@@ -4,7 +4,12 @@
 const ImageSauce = require('./image-sauce');
 const QuoteSauce = require('./quote-sauce');
 
-const { maximumReportsBeforeSauceBan } = require('../server.config');
+const {
+	maximumReportsBeforeSauceBan,
+	defaultWinningScore,
+	gameRoundDurationSeconds,
+	gameRoundTimeoutDurationSeconds, 
+} = require('../server.config');
 
 const { formatAnswer } = require('../utils');
 const MongoDBService = require('../services/mongodb-service');
@@ -226,9 +231,9 @@ class Room {
 	 * Start a game in the room
 	 */
 	async start () {
-		const pointsToWin = 100;
-		const roundDuration = 25 * 1000;  // 25 seconds
-		const timeBetweenRounds = 4 * 1000;  // 4 seconds
+		const pointsToWin = defaultWinningScore;
+		const roundDuration = gameRoundDurationSeconds * 1000;
+		const timeBetweenRounds = gameRoundTimeoutDurationSeconds * 1000;
 		
 		if (this.started) {
 			return;   // Do not start a game in the same room again
