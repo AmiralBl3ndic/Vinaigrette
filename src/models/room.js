@@ -114,10 +114,11 @@ class Room {
 		 */
 		this.remainingRoundTime = 0;
 
-		
 		this.remainingTimeInterval = null;
 
 		this.sauceDeleted = false;
+
+		this.formattedSauceAnswer = '';
 
 		// Add room to list of rooms
 		Room.rooms.push(this);
@@ -152,6 +153,8 @@ class Room {
 		// Save sauce
 		this.currentSauce = sauce;
 
+		this.formattedSauceAnswer = formatAnswer(sauce.originalAnswer);
+
 		// If no sauce found
 		if (!sauce) {
 			Room.io.in(this.name).emit(serverResponse.NO_SAUCES_AVAILABLE);
@@ -180,7 +183,7 @@ class Room {
 	 * @param {SocketIO.Socket} socket Socket to bind the action to
 	 */
 	getSocketAnswerListenerFunction (socket) {
-		return (answer) => this.processPlayerAnswer(socket, answer, this.currentSauce.answer);
+		return (answer) => this.processPlayerAnswer(socket, answer, this.formattedSauceAnswer);
 	}
 
 	/**
