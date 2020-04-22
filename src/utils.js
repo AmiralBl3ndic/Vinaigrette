@@ -6,7 +6,7 @@ const removeAccents = require('remove-accents');
  * @returns `input` with no accents, all lowercase and whitespaces removed
  */
 function formatAnswer (input) {
-	return removeAccents(input.toLowerCase().replace(/[ ,\-_]/g, ''));
+	return input ? removeAccents(input.toLowerCase().replace(/[ ,\-_]/g, '')) : '';
 }
 
 module.exports = {

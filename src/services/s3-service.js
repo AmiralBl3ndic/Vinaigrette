@@ -70,6 +70,25 @@ class S3Service {
 			});
 		});
 	}
+
+	/**
+	 * Delete an image from a public S3 Bucket given its URL
+	 * @param {String} imageUrl URL to access the image
+	 */
+	static async deleteImage (imageUrl) {
+		return new Promise((resolve, reject) => {
+			const urlParts = imageUrl.split('/');
+			const objectKey = urlParts[urlParts.length - 1];
+
+			s3.deleteObject({
+				Bucket: s3BucketName,
+				Key: objectKey,
+			}, (err, data) => {
+				if (err) return reject(err);
+				return resolve(data);
+			});
+		});
+	}
 }
 
 module.exports = S3Service;

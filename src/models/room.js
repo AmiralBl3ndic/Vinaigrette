@@ -1,11 +1,30 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-param-reassign */
+
+const ImageSauce = require('./image-sauce');
+const QuoteSauce = require('./quote-sauce');
+
+const { maximumReportsBeforeSauceBan } = require('../server.config');
 
 const { formatAnswer } = require('../utils');
 const MongoDBService = require('../services/mongodb-service');
-const ImageSauce = require('./image-sauce');
+const S3Service = require('../services/s3-service');
 
 const { requests: clientEvent, responses: serverResponse } = require('../socket-event-names');
 
+/**
+ * @typedef CurrentSauce
+ * @property {mongoose.Types.ObjectID} _id
+ * @property {String} answer
+ * @property {String} imageUrl
+ * @property {String} quote
+ * @property {String} answer
+ * @property {String} originalAnswer
+ */
+
+/**
+ * Represents a game room
+ */
 class Room {
 	/**
 	 * SocketIO Server
@@ -78,8 +97,38 @@ class Room {
 		 */
 		this.started = false;
 
+		/**
+		 * @type {Function}
+		 */
+		this.roundTimeout = null;
+
+		/**
+		 * Current sauce to send to the players
+		 * @type {CurrentSauce}
+		 */
+		this.currentSauce = null;
+
+		/**
+		 * Time remaining to play during the current round
+		 * @type {Number}
+		 */
+		this.remainingRoundTime = 0;
+
+		
+		this.remainingTimeInterval = null;
+
+		this.sauceDeleted = false;
+
 		// Add room to list of rooms
 		Room.rooms.push(this);
+	}
+
+	/**
+	 * Get the current scoreboard of players in the room
+	 * @returns {Array<{username: String, score: Number, found: Boolean}>} Current scoreboard of the room
+	 */
+	getScoreboard () {
+		return this.playersSockets.map(({ username, points, found }) => ({ player: username, score: points, found: found || false }));
 	}
 
 	/**
@@ -87,7 +136,7 @@ class Room {
 	 * @param {Number} points Points to reach to consider victory
 	 */
 	hasAnyPlayerWon (points) {
-		return this.playersSockets.some((player) => player.score >= points);
+		return this.playersSockets.some((player) => player.points >= points);
 	}
 
 	/**
@@ -100,6 +149,9 @@ class Room {
 		// Get a random sauce
 		const sauce = await MongoDBService.getRandomSauce();
 
+		// Save sauce
+		this.currentSauce = sauce;
+
 		// If no sauce found
 		if (!sauce) {
 			Room.io.in(this.name).emit(serverResponse.NO_SAUCES_AVAILABLE);
@@ -108,7 +160,7 @@ class Room {
 		}
 
 		// Determine type of sauce and send it to players
-		if (sauce instanceof ImageSauce) {
+		if (sauce.imageUrl) {
 			Room.io.in(this.name).emit(serverResponse.NEW_ROUND_SAUCE, {
 				type: 'image',
 				imageUrl: sauce.imageUrl,
@@ -124,30 +176,43 @@ class Room {
 	}
 
 	/**
+	 * Get the function that listens and processes a player answer
+	 * @param {SocketIO.Socket} socket Socket to bind the action to
+	 */
+	getSocketAnswerListenerFunction (socket) {
+		return (answer) => this.processPlayerAnswer(socket, answer, this.currentSauce.answer);
+	}
+
+	/**
 	 * Processes the answer sent by the player
 	 * @param {SocketIO.Socket} socket Player's socket
 	 * @param {String} answer Answer sent by the player
 	 * @param {String} rightAnswer Awaited answer
 	 */
 	processPlayerAnswer (socket, answer, rightAnswer) {
-		if (formatAnswer(answer).equals(rightAnswer)) {
+		if (socket.found) return;  // Do not process the answer of a player who have already found the answer
+
+		if (formatAnswer(answer) === rightAnswer) {
 			// Increase player score
 			socket.points += this.roundPoints;
 					
-			// Decrease points won by next player (until it gets under 3 points)
-			if (this.roundPoints >= 3) {
-				this.roundPoints -= 2;
+			// Decrease points won by next player
+			if (this.roundPoints === 5) {  // First player gets 5 points
+				this.roundPoints = 3;
+			} else if (this.roundPoints === 3) {  // Second player gets 3 points
+				this.roundPoints = 2;
+			} else if (this.roundPoints === 2) {  // Third player gets 2 points
+				this.roundPoints = 1;  // Next players get 1 point
 			}
+
+			socket.found = true;
+			socket.foundAt = Date.now();
 
 			// Notify player of good answer
 			socket.emit(serverResponse.GOOD_ANSWER);
 
 			// Notify all players of scoreboard update
-			Room.io.in(this.name).emit(serverResponse.SCOREBOARD_UPDATE, {
-				player: socket.username,
-				found: true,
-				score: socket.score,
-			});
+			Room.io.in(this.name).emit(serverResponse.SCOREBOARD_UPDATE, { scoreboard: this.getScoreboard() });
 		} else {
 			// Notify player of wrong answer
 			socket.emit(serverResponse.WRONG_ANSWER);
@@ -162,11 +227,20 @@ class Room {
 		const roundDuration = 25 * 1000;  // 25 seconds
 		const timeBetweenRounds = 4 * 1000;  // 4 seconds
 		
+		if (this.started) {
+			return;   // Do not start a game in the same room again
+		}
+		
 		// Ensure all players have score set to 0
 		this.playersSockets = this.playersSockets.map((socket) => {
-			socket.score = 0;
+			socket.points = 0;
+			socket.found = false;
+			socket.foundAt = null;
 			return socket;
 		});
+
+		// Notify all players of the room that the game has started
+		Room.io.in(this.name).emit(serverResponse.GAME_START);
 
 		const startGameRound = async () => {
 			console.info(`[GAME] [Room "${this.name}"] Round started`);
@@ -180,17 +254,26 @@ class Room {
 				return;  // No need to continue if no sauce available
 			}
 
-			// Listen for players answers
-			this.playersSockets.forEach(
-				(socket) => socket.on(clientEvent.SAUCE_ANSWER, (answer) => this.processPlayerAnswer(socket, answer, sauce.answer)),
-			);
+			this.sauceDeleted = false;
 
-			// Wait for round duration before doing anything
-			setTimeout(() => {
+			// Ensure all players have their "found status" set to false (not found)
+			this.playersSockets = this.playersSockets.map((socket) => {
+				socket.found = false;
+				socket.foundAt = null;
+				return socket;
+			});
+
+			/**
+			 * Function responsible for the actions at the end of a round
+			 */
+			const processRoundEnd = () => {
 				console.info(`[GAME] [Room "${this.name}"] Round ended`);
 
-				// Stop listening to player answers
-				this.playersSockets.forEach((socket) => socket.removeListener(clientEvent.SAUCE_ANSWER));
+				// Stop listening to player answers and mark all as able to report again
+				this.playersSockets.forEach((socket) => {
+					socket.off(clientEvent.SAUCE_ANSWER, socket.answerListener);
+					socket.currentSauceReported = false;
+				});
 
 				// Notify players of round end
 				Room.io.in(this.name).emit(serverResponse.ROUND_END);
@@ -207,23 +290,102 @@ class Room {
 					}, timeBetweenRounds);
 				} else {  // If a player has won
 					// Determine winner (highest score)
-					// TODO: determine winner with first player to reach goal
 					const winningPlayers = this.playersSockets
-						.map((player) => ({ username: player.username, score: player.score }))  // Get only relevant data
+						.map((player) => ({ username: player.username, score: player.points, foundAt: player.foundAt }))  // Get only relevant data
 						.filter((player) => player.score >= pointsToWin)  // Get only players with 'winning' score
 						.sort((p1, p2) => p2.score - p1.score);  // Sort winning players by score in descending order
+				
+					let winner = winningPlayers[0];
+
+					if (winningPlayers.length >= 2 && winningPlayers[0].score === winningPlayers[1].score) {
+						// eslint-disable-next-line prefer-destructuring
+						winner = winningPlayers.sort((p1, p2) => p1.foundAt - p2.foundAt)[0];
+					}
 
 					// Notify all players of winner
-					Room.io.in(this.name).emit(serverResponse.PLAYER_WON, winningPlayers[0]);
+					Room.io.in(this.name).emit(serverResponse.PLAYER_WON, winner);
 
 					console.info(`[GAME] [Room "${this.name}"] Game ended`);
 				}
-			}, roundDuration);  // TODO: find a way to shorten duration during round
+			};
+
+			this.remainingRoundTime = roundDuration / 1000;
+			const numberOfPlayers = this.playersSockets.length;
+			this.remainingTimeInterval = setInterval(() => {
+				this.remainingRoundTime -= 1;
+				if (this.remainingRoundTime <= 0) {
+					clearInterval(this.remainingTimeInterval);
+					Room.io.in(this.name).emit(serverResponse.TIMER_UPDATE, 0);
+				} else {
+					Room.io.in(this.name).emit(serverResponse.TIMER_UPDATE, this.remainingRoundTime);
+					const numberOfPlayersWhoGuessed = this.playersSockets.filter(({ found }) => found).length;
+					if (numberOfPlayersWhoGuessed === numberOfPlayers) {
+						clearInterval(this.remainingTimeInterval);
+						clearTimeout(this.roundTimeout);
+						processRoundEnd();
+					}
+				}
+			}, 1000);
+
+			// Send a scoreboard update
+			Room.io.in(this.name).emit(serverResponse.SCOREBOARD_UPDATE, { scoreboard: this.getScoreboard() });
+
+			// Listen for players answers
+			this.playersSockets.forEach((socket) => {
+				socket.answerListener = this.getSocketAnswerListenerFunction(socket);
+				socket.on(clientEvent.SAUCE_ANSWER, socket.answerListener);
+			});
+
+			// Wait for round duration before doing anything
+			this.roundTimeout = setTimeout(processRoundEnd, roundDuration);
 		};
 
 		this.started = true;
 		console.info(`[GAME] [Room "${this.name}"] Game started`);
 		startGameRound();  // Start the first game round
+	}
+
+	/**
+	 * Handles updating records reports and deleting the ones with too many reports
+	 */
+	async reportCurrentSauce () {
+		console.info(`[ROOM] [Room "${this.name}"] [REPORT] Sauce reported`);
+
+		const reportedSauce = this.currentSauce;
+
+		if (this.sauceDeleted) return;
+
+		// Check if current sauce is an image
+		if (this.currentSauce.imageUrl) {
+			const sauces = await ImageSauce.find({ imageUrl: reportedSauce.imageUrl });
+			
+			for (const sauce of sauces) {
+				sauce.reports = sauce.reports ? sauce.reports + 1 : 1;
+
+				if (sauce.reports >= maximumReportsBeforeSauceBan) {
+					S3Service.deleteImage(sauce.imageUrl);
+					sauce.remove();
+					this.sauceDeleted = true;
+					console.info(`[ROOM] [Room "${this.name}"] [REPORT] Sauce was deleted`);
+				} else if (!this.sauceDeleted) {
+					sauce.save();
+				}
+			}
+		} else {
+			const sauces = await QuoteSauce.find({ quote: reportedSauce.quote, originalAnswer: reportedSauce.originalAnswer });
+
+			for (const sauce of sauces) {
+				sauce.reports = sauce.reports ? sauce.reports + 1 : 1;
+
+				if (sauce.reports >= maximumReportsBeforeSauceBan) {
+					sauce.remove();
+					this.sauceDeleted = true;
+					console.info(`[ROOM] [Room "${this.name}"] [REPORT] Sauce was deleted`);
+				} else if (!this.sauceDeleted) {
+					sauce.save();
+				}
+			}
+		}
 	}
 }
 

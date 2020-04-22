@@ -2,82 +2,24 @@
 
 const socketEvents = require('./socket-event-names');
 
+let registeredUsernames = [];
+
 const Room = require('./models/room');
 
 /**
- * Handle a client disconnection
- * @param {SocketIO.Socket} socket Socket concerned by the operation
+ * Send the list of rooms to user
+ * @param {SocketIO.Socket} socket Socket to use
  */
-function handleDisconnect (socket) {
-	console.info(`[SOCKET] [Socket ${socket.id}] Client disconnected`);
+function sendRoomsList (socket) {
+	const roomNames = Room.rooms.map((room) => room.name);
+
+	if (socket) {
+		socket.emit(socketEvents.responses.ROOMS_LIST_UPDATE, { roomNames });
+	} else {
+		Room.io.emit(socketEvents.responses.ROOMS_LIST_UPDATE, { roomNames });
+	}
 }
 
-/**
- * Sets the username for a given socket
- * @param {SocketIO.Socket} socket Socket to perform the actions on
- * @param {String} username Name to set
- */
-function handleSetUsername (socket, username) {
-	console.info(`[SOCKET] [Socket ${socket.id}] set_username ("${username}")`);
-
-	socket.username = username;
-}
-
-/**
- * Handles creation of a room by a client
- * 
- * This will attempt to create a room and join it if succeeds
- * @param {SocketIO.Socket} socket Socket to perform the operation with
- * @param {String} roomName Name of the room to create
- */
-function handleCreateRoom (socket, roomName) {
-	console.info(`[SOCKET] [Socket ${socket.id}] create_room ("${roomName}")`);
-
-	// Check that user has set its username
-	if (!socket.username) {
-		socket.emit(socketEvents.responses.CREATE_ROOM_ERROR, { roomName, error: 'You must have a username to create a room' });
-		return;
-	}
-
-	if (!Room.isNameAvailable(roomName)) {
-		socket.emit(socketEvents.responses.CREATE_ROOM_ERROR, { roomName, error: 'Room already exists' });
-		return;
-	}
-
-	const room = new Room(roomName);
-	socket.join(room.name);
-	room.playersSockets.push(socket);
-
-	socket.emit(socketEvents.responses.CREATE_ROOM_SUCCESS, { roomName });
-}
-
-/**
- * Handles join of a room by a client
- * @param {SocketIO.Socket} socket Socket to perform the operation with
- * @param {String} roomName Name of the room to join
- */
-function handleJoinRoom (socket, roomName) {
-	console.info(`[SOCKET] [Socket ${socket.id}] join_room ("${roomName}")`);
-
-	// Check that user has set its username
-	if (!socket.username) {
-		socket.emit(socketEvents.responses.JOIN_ROOM_ERROR, { roomName, error: 'You must have a username to join a room' });
-		return;
-	}
-
-	const room = Room.findRoom(roomName);
-
-	if (!room) {
-		socket.emit(socketEvents.responses.JOIN_ROOM_ERROR, { roomName, error: 'Room not found' });
-		return;
-	}
-
-	socket.join(room.name);
-	socket.score = 0;  // Initialize player score to 0
-	room.playersSockets.push(socket);
-
-	socket.emit(socketEvents.responses.JOIN_ROOM_SUCCESS, { roomName });
-}
 
 /**
  * Handles leaving a room by a client
@@ -104,13 +46,145 @@ function handleLeaveRoom (socket, roomName) {
 
 	// Actually leave room
 	socket.leave(roomName);
+	socket.currentRoom = '';
 	room.playersSockets = room.playersSockets.filter(({ id }) => id !== socket.id);
 
+	const scoreboard = room.getScoreboard();
+
 	socket.emit(socketEvents.responses.LEAVE_ROOM_SUCCESS, { roomName });
+	Room.io.in(room.name).emit(socketEvents.responses.SCOREBOARD_UPDATE, { scoreboard });
 
 	// Check if room still has players in it (otherwise, delete it)
 	if (room.playersSockets.length === 0) {
+		// Check if game is still running
+		if (room.started) {
+			clearTimeout(room.roundTimeout);  // Stop current game
+		}
+
 		Room.rooms = Room.rooms.filter(({ name }) => name !== roomName);
+		sendRoomsList();
+	}
+}
+
+/**
+ * Handle a client disconnection
+ * @param {SocketIO.Socket} socket Socket concerned by the operation
+ */
+function handleDisconnect (socket) {
+	if (socket.currentRoom) {
+		handleLeaveRoom(socket, socket.currentRoom);
+	}
+
+	if (socket.username) {
+		registeredUsernames = registeredUsernames.filter((username) => username !== socket.username);
+	}
+
+	console.info(`[SOCKET] [Socket ${socket.id}] Client disconnected`);
+}
+
+/**
+ * Sets the username for a given socket
+ * @param {SocketIO.Socket} socket Socket to perform the actions on
+ * @param {String} username Name to set
+ */
+function handleSetUsername (socket, username) {
+	console.info(`[SOCKET] [Socket ${socket.id}] set_username ("${username}")`);
+
+	if (!username) {
+		socket.emit(socketEvents.responses.USERNAME_NOT_AVAILABLE, null);
+		return;
+	}
+
+	const trimmedUsername = username.trim();
+
+	if (!registeredUsernames.includes(trimmedUsername)) {
+		socket.username = trimmedUsername;
+		registeredUsernames.push(trimmedUsername);
+		socket.emit(socketEvents.responses.USERNAME_SET, trimmedUsername);
+	} else {
+		socket.emit(socketEvents.responses.USERNAME_NOT_AVAILABLE, trimmedUsername);
+	}
+}
+
+/**
+ * Handles creation of a room by a client
+ * 
+ * This will attempt to create a room and join it if succeeds
+ * @param {SocketIO.Socket} socket Socket to perform the operation with
+ * @param {String} roomName Name of the room to create
+ */
+function handleCreateRoom (socket, roomName) {
+	console.info(`[SOCKET] [Socket ${socket.id}] create_room ("${roomName}")`);
+
+	// Check that user has set its username
+	if (!socket.username) {
+		socket.emit(socketEvents.responses.CREATE_ROOM_ERROR, { roomName, error: 'You must have a username to create a room' });
+		return;
+	}
+
+	if (!Room.isNameAvailable(roomName)) {
+		socket.emit(socketEvents.responses.CREATE_ROOM_ERROR, { roomName, error: 'Room already exists' });
+		return;
+	}
+
+	const room = new Room(roomName);
+	socket.join(room.name);
+	socket.currentRoom = room.name;
+	socket.points = 0;  // Initialize player score to 0
+	socket.found = false;  // Initialize player found status to false (not found)
+	room.playersSockets.push(socket);
+
+	const scoreboard = room.getScoreboard();
+
+	socket.emit(socketEvents.responses.CREATE_ROOM_SUCCESS, { roomName, started: room.started });
+	socket.emit(socketEvents.responses.SCOREBOARD_UPDATE, { scoreboard });
+
+	sendRoomsList();
+}
+
+/**
+ * Handles join of a room by a client
+ * @param {SocketIO.Socket} socket Socket to perform the operation with
+ * @param {String} roomName Name of the room to join
+ */
+function handleJoinRoom (socket, roomName) {
+	console.info(`[SOCKET] [Socket ${socket.id}] join_room ("${roomName}")`);
+
+	// Check that user has set its username
+	if (!socket.username) {
+		socket.emit(socketEvents.responses.JOIN_ROOM_ERROR, { roomName, error: 'You must have a username to join a room' });
+		return;
+	}
+
+	const room = Room.findRoom(roomName);
+
+	if (!room) {
+		socket.emit(socketEvents.responses.JOIN_ROOM_ERROR, { roomName, error: 'Room not found' });
+		return;
+	}
+
+	socket.join(room.name);
+	socket.currentRoom = room.name;
+	socket.points = 0;  // Initialize player score to 0
+	socket.found = false;  // Initialize player found status to false (not found)
+	if (room.started) {
+		// Bind an answer listener to the user's socket
+		socket.answerListener = room.getSocketAnswerListenerFunction(socket);
+		socket.on(socketEvents.requests.SAUCE_ANSWER, socket.answerListener);
+	}
+	room.playersSockets.push(socket);
+
+	const scoreboard = room.getScoreboard();
+
+	socket.emit(socketEvents.responses.JOIN_ROOM_SUCCESS, { roomName, started: room.started });
+	Room.io.in(room.name).emit(socketEvents.responses.SCOREBOARD_UPDATE, { scoreboard });
+
+	if (room.started) {
+		const { currentSauce } = room;
+		const type = currentSauce.quote ? 'quote' : 'image';
+		
+		socket.emit(socketEvents.responses.NEW_ROUND_SAUCE, { type, ...currentSauce });
+		socket.emit(socketEvents.responses.TIMER_UPDATE, room.remainingRoundTime);
 	}
 }
 
@@ -154,12 +228,33 @@ function handleStartGame (socket, roomName) {
 }
 
 /**
- * Send the list of rooms to user
- * @param {SocketIO.Socket} socket Socket to use
+ * Handles a chat message sent by a client in the game room he's playing in.
+ * @param {SocketIO.Socket} socket Socket of the client sending the message
+ * @param {String} message Message being sent
  */
-function sendRoomsList (socket) {
-	const roomNames = Room.rooms.map((room) => room.name);
-	socket.emit(socketEvents.responses.ROOMS_LIST_UPDATE, { roomNames });
+function handleChatMessage (socket, message) {
+	console.info(`[SOCKET] [Socket ${socket.id}] User "${socket.username}" sent message "${message}"`);
+
+	// Perform only if user has a valid username and is in a room
+	if (socket.username && socket.currentRoom) {
+		Room.io.in(socket.currentRoom).emit(socketEvents.responses.CHAT, {
+			message,
+			username: socket.username,
+		});
+	}
+}
+
+/**
+ * Handles a report signal sent by a user about a sauce
+ * @param {SocketIO.Socket} socket Socket of the user reporting the sauce
+ */
+function handleReport (socket) {
+	if (socket.username && socket.currentRoom && !socket.currentSauceReported) {
+		const room = Room.findRoom(socket.currentRoom);
+		room.reportCurrentSauce();  // Start async call to report function
+		socket.currentSauceReported = true;
+		socket.emit(socketEvents.responses.REPORT_RECEIVED);
+	}
 }
 
 /**
@@ -167,7 +262,7 @@ function sendRoomsList (socket) {
  * @param {SocketIO.Socket} socket Socket to init
  */
 function initSocket (socket) {
-	socket.score = undefined;
+	socket.points = 0;
 	socket.username = undefined;
 
 	sendRoomsList(socket);
@@ -178,6 +273,8 @@ function initSocket (socket) {
 	socket.on(socketEvents.requests.JOIN_ROOM, ({ roomName }) => handleJoinRoom(socket, roomName));
 	socket.on(socketEvents.requests.LEAVE_ROOM, ({ roomName }) => handleLeaveRoom(socket, roomName));
 	socket.on(socketEvents.requests.START_GAME, ({ roomName }) => handleStartGame(socket, roomName));
+	socket.on(socketEvents.requests.CHAT, (message) => handleChatMessage(socket, message));
+	socket.on(socketEvents.requests.REPORT, () => handleReport(socket));
 }
 
 module.exports = {

@@ -141,13 +141,22 @@ The available custom actions that the server will understand are the following:
 
 ### `set_username`
 
-Set your usernamee for the session.
+Set your username for the session.
 
 #### Parameters
 
 You must provide a username in the `username` field of the parameter (object).
 
 **IMPORTANT:** For many events, it is required that you set a username.
+
+#### Responses
+
+The server will respond with the following events :
+
+- `username_set`: Means that your username has been set. This event carries the set username 
+as a string parameter.
+- `username_not_available`: Means that your username has not been set because it is not available. 
+This event carries the unavailable username as a string parameter.
 
 ### `create_room`
 
@@ -169,7 +178,8 @@ listen to.
 - `create_room_error` Indicates that the room could not be created, this response comes with an 
 object parameter that will give more details about the failure through its `error` field
 - `create_room_success` Indicates that the room has been created and that you have joined it, 
-this response comes with an object parameter that will give you the name of the room
+this response comes with an object parameter that will give you the name of the room with the 
+`roomName` field and whether a game has started in that room with the `started` field.
 
 ### `join_room`
 
@@ -190,8 +200,9 @@ listen to.
 
 - `join_room_error` Indicates that the room could not be joined, this response comes with an 
 object parameter that will give more details about the failure through its `error` field
-- `join_room_success` Indicates that the room has been joined, this response comes with an 
-object parameter that will give you the name of the room
+- `join_room_success` Indicates that the room has been created and that you have joined it, 
+this response comes with an object parameter that will give you the name of the room with the 
+`roomName` field and whether a game has started in that room with the `started` field.
 
 ### `leave_room`
 
@@ -254,6 +265,28 @@ The server will respond with events:
 - `wrong_answer`: If the answer is incorrect
 - `good_answer`: If the answer is correct
 
+### `chat`
+
+Send a chat message in the game room you are playing.
+
+#### Parameters
+
+This action takes only a string as parameter, it must contain the content of the message.
+
+### `report_sauce`
+
+Report the sauce currently being displayed as being wrong or inacceptable.
+
+#### Parameters
+
+This action does not take any parameter.
+
+#### Responses
+
+The server will respond with the `report_received` event when it has received and processed the report.
+
+This event does not carry any additional data.
+
 
 ## Handling server events
 
@@ -274,6 +307,19 @@ The server sends this event whenever there is no sauce available.
 
 It happens when a game is started but the database does not contain a single record.
 
+### `game_start`
+
+The server sends this event to all players in a room when a game is started in the room 
+the players are in.
+
+This event does not carry any data.
+
+### `game_end`
+
+The server sends this event when the game in your room ended before a player won.
+
+This event does not carry any data.
+
 ### `new_round_sauce`
 
 The server sends this event at each round start. Its parameter contains the sauce information as a json object:
@@ -283,7 +329,8 @@ The server sends this event at each round start. Its parameter contains the sauc
 ```javascript
 {
     "type": "quote",
-    "quote": "Lorem ipsum dolor sit amet"  // Content of the quote
+    "quote": "Lorem ipsum dolor sit amet",  // Content of the quote
+    "id": "zretsrvsfv342Adfgt"  // ID of the quote
 }
 ```
 
@@ -292,7 +339,8 @@ The server sends this event at each round start. Its parameter contains the sauc
 ```javascript
 {
     "type": "image",
-    "imageUrl": "https://link-to-the-image.jpg"  // Link to the image
+    "imageUrl": "https://link-to-the-image.jpg",  // Link to the image
+    "id": "zretsrvsfv342Adfgt"  // ID of the image
 }
 ```
 
@@ -305,9 +353,13 @@ Its parameter contains the following:
 
 ```javascript
 {
-    "player": "johndoe",  // Username of the player to update
-    "found": true,  // Boolean indicating if player found answer (should be true most of the time)
-    "score": 42  // Score of the user
+    scoreboard: [
+        {
+            "player": "johndoe",  // Username of the player to update
+            "found": true,  // Boolean indicating if player found answer (should be true most of the time)
+            "score": 42  // Score of the user
+        }
+    ]
 }
 ```
 
@@ -321,6 +373,12 @@ The server sends this event at each round end, it contains the right answer to t
 
 **WARNING:** this event will soon be merged with the [`round_end`](#`round_end`) event.
 
+### `timer_update`
+
+This event is sent by the server to all the players in a room when the remaining time to 
+guess the sauce has changed (every second, then).
+
+It only contains a number representing the remaining time in seconds.
 
 ### `player_won`
 
@@ -335,9 +393,19 @@ Its parameter contaains the following:
 }
 ```
 
-### `game_end`
+### `chat`
 
-The server sends this event when the game in your room ended before a player won.
+The server sends this event to all users in a room when a user of this room sent a 
+message in the chat.
+
+Its data is formatted as follow:
+
+```javascript
+{
+    "username": "johndoe",  // Username of the user who sent the message
+    "message": "Hello, world!"  // Content of the message sent by the user
+}
+```
 
 
 ## Troubleshooting

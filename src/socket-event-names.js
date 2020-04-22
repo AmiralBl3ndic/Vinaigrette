@@ -6,6 +6,8 @@ module.exports = {
 		SET_USERNAME: 'set_username',
 		START_GAME: 'start_game',
 		SAUCE_ANSWER: 'sauce_answer',
+		CHAT: 'chat',
+		REPORT: 'report_sauce',
 	},
 	responses: {
 		ROOMS_LIST_UPDATE: 'rooms_list_update',
@@ -25,6 +27,12 @@ module.exports = {
 		ROUND_END: 'round_end',
 		RIGHT_ANSWER: 'right_answer',
 		PLAYER_WON: 'player_won',
+		GAME_START: 'game_start',
 		GAME_END: 'game_end',
+		TIMER_UPDATE: 'timer_update',
+		CHAT: 'chat',
+		REPORT_RECEIVED: 'report_received',
+		USERNAME_SET: 'username_set',
+		USERNAME_NOT_AVAILABLE: 'username_not_available',
 	},
 };
