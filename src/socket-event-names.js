@@ -34,5 +34,6 @@ module.exports = {
 		REPORT_RECEIVED: 'report_received',
 		USERNAME_SET: 'username_set',
 		USERNAME_NOT_AVAILABLE: 'username_not_available',
+		FORBIDDEN_USERNAME: 'forbidden_username',
 	},
 };
