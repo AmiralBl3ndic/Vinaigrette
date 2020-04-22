@@ -207,7 +207,7 @@ class Room {
 		
 		const formattedAnswer = formatAnswer(answer);
 
-		if (formatAnswer === rightAnswer) {
+		if (formattedAnswer === rightAnswer) {
 			// Increase player score
 			socket.points += this.roundPoints;
 					
