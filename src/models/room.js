@@ -196,12 +196,17 @@ class Room {
 			// Increase player score
 			socket.points += this.roundPoints;
 					
-			// Decrease points won by next player (until it gets under 3 points)
-			if (this.roundPoints >= 3) {
-				this.roundPoints -= 2;
+			// Decrease points won by next player
+			if (this.roundPoints === 5) {  // First player gets 5 points
+				this.roundPoints = 3;
+			} else if (this.roundPoints === 3) {  // Second player gets 3 points
+				this.roundPoints = 2;
+			} else if (this.roundPoints === 2) {  // Third player gets 2 points
+				this.roundPoints = 1;  // Next players get 1 point
 			}
 
 			socket.found = true;
+			socket.foundAt = Date.now();
 
 			// Notify player of good answer
 			socket.emit(serverResponse.GOOD_ANSWER);
@@ -230,6 +235,7 @@ class Room {
 		this.playersSockets = this.playersSockets.map((socket) => {
 			socket.points = 0;
 			socket.found = false;
+			socket.foundAt = null;
 			return socket;
 		});
 
@@ -253,6 +259,7 @@ class Room {
 			// Ensure all players have their "found status" set to false (not found)
 			this.playersSockets = this.playersSockets.map((socket) => {
 				socket.found = false;
+				socket.foundAt = null;
 				return socket;
 			});
 
@@ -283,14 +290,20 @@ class Room {
 					}, timeBetweenRounds);
 				} else {  // If a player has won
 					// Determine winner (highest score)
-					// TODO: determine winner with first player to reach goal
 					const winningPlayers = this.playersSockets
-						.map((player) => ({ username: player.username, score: player.score }))  // Get only relevant data
+						.map((player) => ({ username: player.username, score: player.score, foundAt: player.foundAt }))  // Get only relevant data
 						.filter((player) => player.score >= pointsToWin)  // Get only players with 'winning' score
 						.sort((p1, p2) => p2.score - p1.score);  // Sort winning players by score in descending order
+				
+					let winner = winningPlayers[0];
+
+					if (winningPlayers.length >= 2 && winningPlayers[0].score === winningPlayers[1].score) {
+						// eslint-disable-next-line prefer-destructuring
+						winner = winningPlayers.sort((p1, p2) => p1.foundAt - p2.foundAt)[0];
+					}
 
 					// Notify all players of winner
-					Room.io.in(this.name).emit(serverResponse.PLAYER_WON, winningPlayers[0]);
+					Room.io.in(this.name).emit(serverResponse.PLAYER_WON, winner);
 
 					console.info(`[GAME] [Room "${this.name}"] Game ended`);
 				}
