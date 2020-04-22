@@ -273,6 +273,7 @@ The server will respond with events:
 
 - `wrong_answer`: If the answer is incorrect
 - `good_answer`: If the answer is correct
+- `answer_is_close`: If the answer is close to the correct answer
 
 ### `chat`
 
