@@ -9,6 +9,8 @@ const app = express();
 const socketio = require('socket.io');
 
 const bodyParser = require('body-parser');
+
+const { version } = require('../package.json');
 const serverConfig = require('./server.config');
 
 const { initSocket } = require('./socket-handler');
@@ -57,7 +59,7 @@ mongoose.connect(serverConfig.mongoConnectionString, {
 
 		// Determine port to listen on and start Express app
 		const port = process.env.EXPRESS_LISTENING_PORT || 4242;
-		const server = app.listen(port, () => console.info(`[Server] Vinaigrette server started on port ${port}.`));
+		const server = app.listen(port, () => console.info(`[Server] Vinaigrette server v${version} started on port ${port}.`));
 
 		/** *******************************************************
 		 *											SOCKETS
