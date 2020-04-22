@@ -21,6 +21,7 @@ module.exports = {
 		START_GAME_ERROR: 'start_game_error',
 		GOOD_ANSWER: 'good_answer',
 		WRONG_ANSWER: 'wrong_answer',
+		ANSWER_IS_CLOSE: 'answer_is_close',
 		NO_SAUCES_AVAILABLE: 'no_sauces_available',
 		NEW_ROUND_SAUCE: 'new_round_sauce',
 		SCOREBOARD_UPDATE: 'scoreboard_update',
