@@ -8,3 +8,5 @@ mongodb-data/
 # IDE files
 .vscode/
 .idea/
+
+docker-compose.yml
