@@ -11,7 +11,7 @@ function formatAnswer (input) {
 	const withoutAccents = removeAccents(input.toLowerCase().replace(/[ ,\-_]/g, ''));
 	if (!withoutAccents) return '';
 
-	return withoutAccents.replace(/[,;:?./+="'(!)]/g, '');
+	return withoutAccents.toLowerCase().replace(/[,;:?./+="'(!)]/g, '');
 }
 
 module.exports = {
