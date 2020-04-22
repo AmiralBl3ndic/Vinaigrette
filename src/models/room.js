@@ -136,7 +136,7 @@ class Room {
 	 * @param {Number} points Points to reach to consider victory
 	 */
 	hasAnyPlayerWon (points) {
-		return this.playersSockets.some((player) => player.score >= points);
+		return this.playersSockets.some((player) => player.points >= points);
 	}
 
 	/**
@@ -291,7 +291,7 @@ class Room {
 				} else {  // If a player has won
 					// Determine winner (highest score)
 					const winningPlayers = this.playersSockets
-						.map((player) => ({ username: player.username, score: player.score, foundAt: player.foundAt }))  // Get only relevant data
+						.map((player) => ({ username: player.username, score: player.points, foundAt: player.foundAt }))  // Get only relevant data
 						.filter((player) => player.score >= pointsToWin)  // Get only players with 'winning' score
 						.sort((p1, p2) => p2.score - p1.score);  // Sort winning players by score in descending order
 				
