@@ -125,6 +125,8 @@ class Room {
 
 		this.formattedSauceAnswer = '';
 
+		this.isClosing = false;
+
 		// Add room to list of rooms
 		Room.rooms.push(this);
 	}
@@ -293,9 +295,11 @@ class Room {
 						answer: sauce.originalAnswer,
 					});
 
-					setTimeout(() => {
-						startGameRound();
-					}, timeBetweenRounds);
+					if (!this.isClosing) {
+						setTimeout(() => {
+							startGameRound();
+						}, timeBetweenRounds); 
+					}
 				} else {  // If a player has won
 					// Send good answer to all players
 					Room.io.in(this.name).emit(serverResponse.RIGHT_ANSWER, {
