@@ -47,6 +47,8 @@ const restrictedUsernames = [
 	'hitler',  // Because obvious
 ];
 
+const levenshteinCloseThreshold = 2;
+
 module.exports = {
 	mongoConnectionString: process.env.CONTAINERIZED === 'true' ? 'mongodb://mongo:27017/' : 'mongodb://localhost:27017/',
 
@@ -73,4 +75,6 @@ module.exports = {
 	gameRoundTimeoutDurationSeconds,
 
 	restrictedUsernames,
+
+	levenshteinCloseThreshold,
 };

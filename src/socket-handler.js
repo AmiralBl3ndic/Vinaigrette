@@ -22,7 +22,6 @@ function sendRoomsList (socket) {
 	}
 }
 
-
 /**
  * Handles leaving a room by a client
  * 
@@ -62,6 +61,8 @@ function handleLeaveRoom (socket, roomName) {
 		if (room.started) {
 			clearTimeout(room.roundTimeout);  // Stop current game
 		}
+
+		room.isClosing = true;  // Simple security
 
 		Room.rooms = Room.rooms.filter(({ name }) => name !== roomName);
 		sendRoomsList();

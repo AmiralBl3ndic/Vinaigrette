@@ -1,6 +1,6 @@
 {
   "name": "vinaigrette-server",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Backend server and API for the Vinaigrette app",
   "main": "src/index.js",
   "author": "Camille Briand <camille.briand@efrei.net> (https://camille-briand.fr/)",
@@ -14,6 +14,7 @@
     "express": "^4.17.1",
     "express-fileupload": "^1.1.6",
     "express-rate-limit": "^5.1.1",
+    "js-levenshtein": "^1.1.6",
     "mongoose": "^5.9.9",
     "morgan": "^1.10.0",
     "remove-accents": "^0.4.2",
