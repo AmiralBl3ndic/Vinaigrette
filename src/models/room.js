@@ -1,6 +1,8 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-param-reassign */
 
+const levenshtein = require('js-levenshtein');
+
 const ImageSauce = require('./image-sauce');
 const QuoteSauce = require('./quote-sauce');
 
@@ -9,6 +11,7 @@ const {
 	defaultWinningScore,
 	gameRoundDurationSeconds,
 	gameRoundTimeoutDurationSeconds, 
+	levenshteinCloseThreshold,
 } = require('../server.config');
 
 const { formatAnswer } = require('../utils');
@@ -201,8 +204,10 @@ class Room {
 	 */
 	processPlayerAnswer (socket, answer, rightAnswer) {
 		if (socket.found) return;  // Do not process the answer of a player who have already found the answer
+		
+		const formattedAnswer = formatAnswer(answer);
 
-		if (formatAnswer(answer) === rightAnswer) {
+		if (formatAnswer === rightAnswer) {
 			// Increase player score
 			socket.points += this.roundPoints;
 					
@@ -223,8 +228,9 @@ class Room {
 
 			// Notify all players of scoreboard update
 			Room.io.in(this.name).emit(serverResponse.SCOREBOARD_UPDATE, { scoreboard: this.getScoreboard() });
-		} else {
-			// Notify player of wrong answer
+		} else if (levenshtein(formattedAnswer, rightAnswer) <= levenshteinCloseThreshold) {  // If answer is close
+			socket.emit(serverResponse.ANSWER_IS_CLOSE);
+		} else {  // Notify player of wrong answer
 			socket.emit(serverResponse.WRONG_ANSWER);
 		}
 	}
