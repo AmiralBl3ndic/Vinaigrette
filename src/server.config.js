@@ -47,7 +47,7 @@ const restrictedUsernames = [
 	'hitler',  // Because obvious
 ];
 
-const levenshteinCloseThreshold = 3;
+const levenshteinCloseThreshold = 2;
 
 module.exports = {
 	mongoConnectionString: process.env.CONTAINERIZED === 'true' ? 'mongodb://mongo:27017/' : 'mongodb://localhost:27017/',
