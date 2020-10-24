@@ -2,7 +2,7 @@
 
 Express.JS server for hosting custom PopSauce-like games.
 
-This server requires you to have an AWS account and that you have an access key to your 
+This server requires you to have an AWS account and that you have an access key to your
 account.
 
 ## Available REST API endpoints
@@ -12,6 +12,7 @@ account.
 To avoid flood, the API only authorizes a certain number of requests on resource-consuming endpoints.
 
 There are two limiters:
+
 - `postLimiter`: The requests limit to all endpoints protected by this limiter (shared) is set to **60 requests by hour** (default)
 - `randomLimiter`: The requests limit to all endpoints protected by this limiter (shared) is set to **3600 requests by hour** (default)
 
@@ -31,8 +32,8 @@ This endpoint is protected with the `postLimiter` requests limiter.
 
 The request body must contain the following fields:
 
-- `quote` *(string)*: The quote to store
-- `answer` *(string)*: The awaited answer to the sauce
+- `quote` _(string)_: The quote to store
+- `answer` _(string)_: The awaited answer to the sauce
 
 ### `POST /sauce/image`
 
@@ -46,14 +47,14 @@ This endpoint is protected with the `postLimiter` requests limiter.
 
 The request body must contain the following fields:
 
-- `image` *(file)*: The image to store (MIME type must be either "image/jpeg" or "image/png")
-- `answer` *(string)*: The awaited answer to the sauce
+- `image` _(file)_: The image to store (MIME type must be either "image/jpeg" or "image/png")
+- `answer` _(string)_: The awaited answer to the sauce
 
 #### Warning
 
 This endpoint is only able to parse requests sent with `Content-Type: multipart/form-data`.
 
-By default, this endpoint will only accept files up to 15 MB. This threshold is configurable with the 
+By default, this endpoint will only accept files up to 15 MB. This threshold is configurable with the
 `maximumImageSizeAllowed` variable of `server.config.js`.
 
 ### `GET /sauce/random`
@@ -66,27 +67,26 @@ This endpoint is protected with the `randomLimiter` requests limiter.
 
 #### Response
 
-The response will be a JSON object, its structure depends on whether you have retrieved a quote 
+The response will be a JSON object, its structure depends on whether you have retrieved a quote
 or an image.
 
 If you are retrieving a quote, the structure will be as follow:
 
 ```json
 {
-    "type": "quote",
-    "quote": "Content of the random quote sauce",
-    "answer": "Answer to that random quote sauce"
+  "type": "quote",
+  "quote": "Content of the random quote sauce",
+  "answer": "Answer to that random quote sauce"
 }
 ```
-
 
 If you are retrieving an image, the structure will be as follow:
 
 ```json
 {
-    "type": "image",
-    "imageUrl": "https://secure-link-to-the-image/",
-    "answer": "Answer to that random image sauce"
+  "type": "image",
+  "imageUrl": "https://secure-link-to-the-image/",
+  "answer": "Answer to that random image sauce"
 }
 ```
 
@@ -104,9 +104,9 @@ This endpoint produces a JSON object with the structure as follow:
 
 ```json
 {
-    "type": "quote",
-    "quote": "Content of the random quote sauce",
-    "answer": "Answer to that random quote sauce"
+  "type": "quote",
+  "quote": "Content of the random quote sauce",
+  "answer": "Answer to that random quote sauce"
 }
 ```
 
@@ -124,12 +124,11 @@ This endpoint produces a JSON object with the structure as follow:
 
 ```json
 {
-    "type": "image",
-    "imageUrl": "https://secure-link-to-the-image/",
-    "answer": "Answer to that random image sauce"
+  "type": "image",
+  "imageUrl": "https://secure-link-to-the-image/",
+  "answer": "Answer to that random image sauce"
 }
 ```
-
 
 ## Available sockets actions
 
@@ -160,12 +159,12 @@ You must provide a username in the `username` field of the parameter (object).
 
 The server will respond with the following events:
 
-- `username_set`: Means that your username has been set. This event carries the set username 
-as a string parameter.
-- `username_not_available`: Means that your username has not been set because it is not available. 
-This event carries the unavailable username as a string parameter.
-- `forbidden_username`: Means that the username you have chosen is forbidden and cannot be used. 
-This event carries the forbidden username as a string parameter.
+- `username_set`: Means that your username has been set. This event carries the set username
+  as a string parameter.
+- `username_not_available`: Means that your username has not been set because it is not available.
+  This event carries the unavailable username as a string parameter.
+- `forbidden_username`: Means that the username you have chosen is forbidden and cannot be used.
+  This event carries the forbidden username as a string parameter.
 
 ### `create_room`
 
@@ -177,18 +176,18 @@ You must have set a valid username before sending this event. Otherwise it will 
 
 This action takes an object as a parameter, it must have the following properties set:
 
-- `roomName` *(string)*: Name of the room to create
+- `roomName` _(string)_: Name of the room to create
 
 #### Responses
 
-When performed, this action produces a response in the form of a socket event that you should 
+When performed, this action produces a response in the form of a socket event that you should
 listen to.
 
-- `create_room_error` Indicates that the room could not be created, this response comes with an 
-object parameter that will give more details about the failure through its `error` field
-- `create_room_success` Indicates that the room has been created and that you have joined it, 
-this response comes with an object parameter that will give you the name of the room with the 
-`roomName` field and whether a game has started in that room with the `started` field.
+- `create_room_error` Indicates that the room could not be created, this response comes with an
+  object parameter that will give more details about the failure through its `error` field
+- `create_room_success` Indicates that the room has been created and that you have joined it,
+  this response comes with an object parameter that will give you the name of the room with the
+  `roomName` field and whether a game has started in that room with the `started` field.
 
 ### `join_room`
 
@@ -200,40 +199,39 @@ You must have set a valid username before sending this event. Otherwise it will 
 
 This action takes an object as a parameter, it must have the following properties set:
 
-- `roomName` *(string)*: Name of the room to join
+- `roomName` _(string)_: Name of the room to join
 
 #### Responses
 
-When performed, this action produces a response in the form of a socket event that you should 
+When performed, this action produces a response in the form of a socket event that you should
 listen to.
 
-- `join_room_error` Indicates that the room could not be joined, this response comes with an 
-object parameter that will give more details about the failure through its `error` field
-- `join_room_success` Indicates that the room has been created and that you have joined it, 
-this response comes with an object parameter that will give you the name of the room with the 
-`roomName` field and whether a game has started in that room with the `started` field.
+- `join_room_error` Indicates that the room could not be joined, this response comes with an
+  object parameter that will give more details about the failure through its `error` field
+- `join_room_success` Indicates that the room has been created and that you have joined it,
+  this response comes with an object parameter that will give you the name of the room with the
+  `roomName` field and whether a game has started in that room with the `started` field.
 
 ### `leave_room`
 
-Leave an existing game room. Will produce an error if the room does not exist or if you have not 
+Leave an existing game room. Will produce an error if the room does not exist or if you have not
 joined it.
 
 #### Parameters
 
 This action takes an object as a parameter, it must have the following properties set:
 
-- `roomName` *(string)*: Name of the room to leave
+- `roomName` _(string)_: Name of the room to leave
 
 #### Responses
 
-When performed, this action produces a response in the form of a socket event that you should 
+When performed, this action produces a response in the form of a socket event that you should
 listen to.
 
-- `leave_room_error` Indicates that the room could not be left, this response comes with an 
-object parameter that will give more details about the failure through its `error` field
-- `leave_room_success` Indicates that the room has been left, this response comes with an 
-object parameter that will give you the name of the room
-
+- `leave_room_error` Indicates that the room could not be left, this response comes with an
+  object parameter that will give more details about the failure through its `error` field
+- `leave_room_success` Indicates that the room has been left, this response comes with an
+  object parameter that will give you the name of the room
 
 ### `start_game`
 
@@ -245,23 +243,23 @@ You must have set a valid username before sending this event. Otherwise it will 
 
 This action takes an object as a parameter, it must have the following properties set:
 
-- `roomName` *(string)*: Name of the room to start the game in
+- `roomName` _(string)_: Name of the room to start the game in
 
 #### Responses
 
-When performed, this action produces a response in the form of a socket event that you should 
+When performed, this action produces a response in the form of a socket event that you should
 listen to.
 
-- `start_game_error` Indicates that the room could not be created, this response comes with an 
-object parameter that will give more details about the failure through its `error` field
-- `start_game_success` Indicates that the room has been created and that you have joined it, 
-this response comes with an object parameter that will give you the name of the room
+- `start_game_error` Indicates that the room could not be created, this response comes with an
+  object parameter that will give more details about the failure through its `error` field
+- `start_game_success` Indicates that the room has been created and that you have joined it,
+  this response comes with an object parameter that will give you the name of the room
 
 ### `sauce_answer`
 
 Submit an answer for the current sauce.
 
-The server will only listen for this event in the timespan of a round. 
+The server will only listen for this event in the timespan of a round.
 
 #### Parameters
 
@@ -297,10 +295,9 @@ The server will respond with the `report_received` event when it has received an
 
 This event does not carry any additional data.
 
-
 ## Handling server events
 
-In addition to the socketing responses described for the actions above, the server will 
+In addition to the socketing responses described for the actions above, the server will
 send socket events depending on other players activity or game status.
 
 They are described here.
@@ -313,13 +310,13 @@ It contains the list of room names as an array in the `roomNames` field of its p
 
 ### `no_sauces_available`
 
-The server sends this event whenever there is no sauce available. 
+The server sends this event whenever there is no sauce available.
 
 It happens when a game is started but the database does not contain a single record.
 
 ### `game_start`
 
-The server sends this event to all players in a room when a game is started in the room 
+The server sends this event to all players in a room when a game is started in the room
 the players are in.
 
 This event does not carry any data.
@@ -356,20 +353,20 @@ The server sends this event at each round start. Its parameter contains the sauc
 
 ### `scoreboard_update`
 
-The server sends this event at each time a player in your room updates its score (usually because 
+The server sends this event at each time a player in your room updates its score (usually because
 he found the answer).
 
 Its parameter contains the following:
 
 ```javascript
 {
-    scoreboard: [
-        {
-            "player": "johndoe",  // Username of the player to update
-            "found": true,  // Boolean indicating if player found answer (should be true most of the time)
-            "score": 42  // Score of the user
-        }
-    ]
+  scoreboard: [
+    {
+      player: "johndoe", // Username of the player to update
+      found: true, // Boolean indicating if player found answer (should be true most of the time)
+      score: 42, // Score of the user
+    },
+  ];
 }
 ```
 
@@ -385,7 +382,7 @@ The server sends this event at each round end, it contains the right answer to t
 
 ### `timer_update`
 
-This event is sent by the server to all the players in a room when the remaining time to 
+This event is sent by the server to all the players in a room when the remaining time to
 guess the sauce has changed (every second, then).
 
 It only contains a number representing the remaining time in seconds.
@@ -398,14 +395,14 @@ Its parameter contaains the following:
 
 ```javascript
 {
-    "username": "johndoe",  // Username of winner 
+    "username": "johndoe",  // Username of winner
     "score": 101  // Score of winner
 }
 ```
 
 ### `chat`
 
-The server sends this event to all users in a room when a user of this room sent a 
+The server sends this event to all users in a room when a user of this room sent a
 message in the chat.
 
 Its data is formatted as follow:
@@ -417,15 +414,13 @@ Its data is formatted as follow:
 }
 ```
 
-
 ## Troubleshooting
 
-Whenever an error occurs, you should aways be able to retrieve a JSON object describing the nature 
+Whenever an error occurs, you should aways be able to retrieve a JSON object describing the nature
 of the error or your problem.
 
-A quick way to understand is to look at the `message` field of this JSON object, it should contain 
+A quick way to understand is to look at the `message` field of this JSON object, it should contain
 a human-readable description of the exact problem.
-
 
 ## Setup
 
@@ -435,58 +430,58 @@ This is pretty straightforward
 
 2. Get an IAM access key to your AWS account
 
-This can be done in the *IAM* section of your AWS Console.
+This can be done in the _IAM_ section of your AWS Console.
 
-Please keep the access key ID and secret because the server needs them to connect to a S3 
+Please keep the access key ID and secret because the server needs them to connect to a S3
 Bucket.
 
 3. Create a S3 Bucket and setup the following rules
 
-Once again, this is pretty straightforward, so do not forget to untick the *"Block Public 
-Access"* box.
+Once again, this is pretty straightforward, so do not forget to untick the _"Block Public
+Access"_ box.
 
-Because you only want the server to be able to directly write files into your bucket, please 
+Because you only want the server to be able to directly write files into your bucket, please
 set the following strategy for your bucket:
 
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "PublicRead",
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::YOUR-BUCKET-NAME-HERE/*"
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublicRead",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::YOUR-BUCKET-NAME-HERE/*"
+    }
+  ]
 }
 ```
 
-This strategy will allow any IP to HTTP GET files in your bucket, so be careful what you put 
+This strategy will allow any IP to HTTP GET files in your bucket, so be careful what you put
 into it.
 
 4. Configure the environment variables
 
-This server heavily relies on environment variables, so you should place the following 
+This server heavily relies on environment variables, so you should place the following
 variables into a `.env` file at the root of the server.
 
-- `EXPRESS_LISTENING_PORT`: Port on which you want the server to listen for requests 
-(default is `4242`)
-- `AWS_REGION_CODE`: Region code in which to use AWS *(examples: eu-west-2, us-east-1, ...)*
-- `AWS_S3_BUCKET_NAME`: AWS S3 Bucket name where to store the data retrieved by the server
-- `AWS_ACCESS_KEY_ID`: ID of the access key that the server should use to access your S3 
-Bucket
-- `AWS_SECRET_ACCESS_KEY`: Secret of the access key to required to access the S3 Bucket
+- `EXPRESS_LISTENING_PORT`: Port on which you want the server to listen for requests
+  (default is `4242`)
+- `S3_BUCKET_NAME`: S3 Bucket name where to store the data retrieved by the server
+- `S3_PUBLIC_URL`: Public URL pointing to the root of the S3 (must not include the bucket name)
+- `MINIO_ACCESS_KEY`: ID of the access key that the server should use to access your S3
+  Bucket
+- `MINIO_SECRET_KEY`: Secret of the access key to required to access the S3 Bucket
 - `MONGO_INITDB_ROOT_USERNAME`: Username to use for accessing your MongoDB database (does not have to be root)
 - `MONGO_INITDB_ROOT_PASSWORD`: Password of the user to use for accessing the MongoDB database
-- *(Optional)* `CONTAINERIZED`: `(true|false)` Whether you are running your application in a container (LXC/Docker)
+- _(Optional)_ `CONTAINERIZED`: `(true|false)` Whether you are running your application in a container (LXC/Docker)
 
 5. Ensure the database connection string is correct
 
 This information can be found in the file `src/server.config.js` under the `mongoConnectionString` property.
 
-By default, the connection string allows to work in a local environment with the a local instance of MongoDB 
+By default, the connection string allows to work in a local environment with the a local instance of MongoDB
 (better for debugging) rather than setting up containers already.
 
 Please ensure the database connection string matches the one you want to use :
